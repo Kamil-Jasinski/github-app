@@ -24,17 +24,15 @@ body {
   padding: 0;
   box-sizing: border-box;
   font-family: "Open Sans", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #fff;
 }
 
 body {
   background-color: #24292e;
 }
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #fff;
-
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -47,7 +45,10 @@ body {
   justify-content: center;
   align-items: center;
   width: 100%;
-  padding: 20px 0;
+  padding: 50px 0;
+    img{
+      width: 200px;
+    }
 }
 
 ul {
