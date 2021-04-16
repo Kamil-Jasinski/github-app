@@ -52,7 +52,6 @@
 
 <script>
 import { Component, Vue, Prop } from "vue-property-decorator";
-import axios from "axios";
 
 @Component({
    components: {},
@@ -80,11 +79,11 @@ export default class SearchBar extends Vue {
 
       try {
          // GET REPOS
-         const repos = await axios.get(
+         const repos = await Vue.axios.get(
             `https://api.github.com/users/${this.userName}/repos?sort=${this.sorting}&direction=${this.order}&per_page=${this.perPage}&page=${this.page}`
          );
          //  GET USER
-         const userResponse = await axios.get(
+         const userResponse = await Vue.axios.get(
             "https://api.github.com/users/" + this.userName
          );
 
@@ -228,7 +227,7 @@ export default class SearchBar extends Vue {
    margin: 20px;
 }
 .filter {
-   margin-top: 0;
+   margin: 0 20px;
 }
 
 /* Hover title border */

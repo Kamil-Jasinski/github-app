@@ -38,7 +38,7 @@
             Commits
          </button>
          <button class="card-button" @click="openContributorsModal = true">
-            Committers
+            Contributors
          </button>
       </slot>
 
