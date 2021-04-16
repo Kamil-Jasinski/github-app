@@ -1,0 +1,11 @@
+.align-self-center {
+               align-self: center;
+}
+.bold {
+               font-weight: bold;
+}
+hr.separator {
+               border-top: 1px solid $main-app-color-light;
+               border: 1px solid $main-app-color-dark;
+               margin: 10px 0 40px 0;
+}
