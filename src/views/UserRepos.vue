@@ -1,7 +1,7 @@
 <template>
    <div class="wrapper">
       <!-- SEARCH -->
-      <the-container
+      <TheContainer
          :width="'max-content'"
          :margin="'40px auto'"
          :borderRadius="'25px'"
@@ -10,12 +10,12 @@
          :boxShadow="'none'"
       >
          <SearchBar />
-      </the-container>
+      </TheContainer>
 
       <div class="userRepos">
          <!-- USER CARD -->
          <section class="repos-owner">
-            <the-container
+            <TheContainer
                width="95%"
                :bgColor="'#2C445C'"
                :bg="'linear-gradient(20deg, #2C445C 60%, #8396A8 100%)'"
@@ -26,24 +26,26 @@
                      <img v-else src="@/assets/logo.png" alt="" />
                   </div>
                   <div class="details">
-                     <h2 v-if="userName" class="align-center name">
+                     <h2 v-if="userName" class="align-self-center name">
                         {{ userName }}
                      </h2>
                      <h3
                         v-if="userLogin && userName"
                         name="login"
-                        class="align-center login"
+                        class="align-self-center login"
                      >
                         ({{ userLogin }})
                      </h3>
                      <h2
                         v-else-if="!userName"
                         name="login"
-                        class="align-center name"
+                        class="align-self-center name"
                      >
                         {{ userLogin }}
                      </h2>
-                     <h2 v-else name="login" class="align-center name">User</h2>
+                     <h2 v-else name="login" class="align-self-center name">
+                        User
+                     </h2>
                      <hr class="separator" />
                      <p name="public-repos-number">
                         Public repositories
@@ -62,18 +64,18 @@
                      <p name="email">{{ user.email }}</p>
                   </div>
                </div>
-            </the-container>
+            </TheContainer>
          </section>
 
          <!-- USER REPOS -->
          <section class="user-repos-list">
             <!-- Header -->
-            <the-title v-if="repos.length > 0"
-               >{{ user.name ? user.name : user.login }} repositories</the-title
+            <TheTitle v-if="repos.length > 0"
+               >{{ user.name ? user.name : user.login }} repositories</TheTitle
             >
-            <the-title v-else
+            <TheTitle v-else
                >{{ user.name ? user.name : user.login }} have no repositories to
-               show</the-title
+               show</TheTitle
             >
             <!-- Pager -->
             <div v-if="repos.length > 0" class="pager">
@@ -84,62 +86,58 @@
                   >
                </p>
                <form class="__page-form" @submit.prevent="pager">
-                  <label>
+                  <div>
                      Page:
                      <input
                         type="number"
                         v-model.number="goToPage"
                         :max="userMaxReposPages"
+                        min="1"
                      />
                      <button type="submit">GO</button>
-                  </label>
+                  </div>
                </form>
-               <!-- <button id="show-modal" @click="showErrorModal = true">
-                  Show Modal
-               </button> -->
-               <!-- use the modal component, pass in the prop -->
-               <the-modal v-if="showErrorModal" @close="setShowErrorModal">
+
+               <TheModal v-if="showErrorModal" @close="setShowErrorModal">
                   <h3 slot="header">Error</h3>
                   <p slot="body">{{ errorMessage }}</p>
-               </the-modal>
+               </TheModal>
             </div>
 
             <!-- Repos -->
-            <the-container :width="'100%'" v-for="repo in repos" :key="repo.id">
-               <div class="repo-card">
-                  <div class="details">
-                     <h2 class="align-center repo-name">{{ repo.name }}</h2>
+            <TheRepo
+               v-for="repo in repos"
+               :key="repo.id"
+               :userLogin="userLogin"
+               :repoName="repo.name"
+            >
+               <template>
+                  <template slot="header">{{ repo.name }}</template>
 
-                     <hr class="separator" />
+                  <template slot="description">
+                     <span class="bold">Description:</span>
+                     {{ repo.description ? repo.description : "-" }}
+                  </template>
 
-                     <ul>
-                        <li>
-                           <div class="__detail">
-                              <span class="bold">Description:</span>
-                              {{ repo.description ? repo.description : "-" }}
-                           </div>
-                        </li>
-                        <li>
-                           <div class="__detail">
-                              <span class="bold">Forks:</span> {{ repo.forks }}
-                           </div>
-                        </li>
-                        <li>
-                           <div class="__detail">
-                              <span class="bold">Github Url:</span>
-                              {{ repo.url }}
-                           </div>
-                        </li>
-                        <li>
-                           <div class="__detail">
-                              <span class="bold">Clone Url:</span>
-                              {{ repo.clone_url }}
-                           </div>
-                        </li>
-                     </ul>
-                  </div>
-               </div>
-            </the-container>
+                  <template slot="forks"
+                     ><span class="bold">Forks:</span>
+                     {{ repo.forks }}</template
+                  >
+                  <template slot="githubUrl">
+                     <span class="bold">Github Url:</span> {{ repo.url }}
+                  </template>
+
+                  <template slot="cloneUrl">
+                     <span class="bold">Clone Url:</span>
+                     {{ repo.clone_url }}
+                  </template>
+
+                  <template slot="createdAt">
+                     <span class="bold">Created at:</span>
+                     {{ $luxon(repo.created_at) }}
+                  </template>
+               </template>
+            </TheRepo>
          </section>
       </div>
    </div>
@@ -151,7 +149,7 @@ import TheContainer from "@/components/core/TheContainer.vue";
 import TheTitle from "@/components/core/TheTitle.vue";
 import SearchBar from "@/components/SearchBar.vue";
 import TheModal from "@/components/core/TheModal.vue";
-import axios from "axios";
+import TheRepo from "@/components/core/TheRepo.vue";
 
 @Component({
    components: {
@@ -159,6 +157,7 @@ import axios from "axios";
       TheTitle,
       SearchBar,
       TheModal,
+      TheRepo,
    },
 })
 export default class UserRepos extends Vue {
@@ -186,7 +185,7 @@ export default class UserRepos extends Vue {
       console.log("Go to page", this.goToPage);
 
       try {
-         const repos = await axios.get(
+         const repos = await Vue.axios.get(
             // `https://api.github.com/users/${this.userLogin}/repos?page=${this.goToPage}&per_page=${this.currentPerPage}`
             `https://api.github.com/users/${this.userLogin}/repos?page=${this.goToPage}&per_page=${this.currentPerPage}`
          );
@@ -237,7 +236,7 @@ export default class UserRepos extends Vue {
    }
 
    mounted() {
-      // console.log(this.user);
+      console.log(this.repos);
    }
 
    beforeMount() {
@@ -253,7 +252,6 @@ export default class UserRepos extends Vue {
 <style lang="scss" scoped>
 .userRepos {
    display: flex;
-
    margin: auto auto;
 }
 .wrapper {
@@ -262,11 +260,6 @@ export default class UserRepos extends Vue {
    margin: auto auto;
 }
 
-hr.separator {
-   border-top: 1px solid $main-app-color-light;
-   border: 1px solid $main-app-color-dark;
-   margin: 10px 0 40px 0;
-}
 .repos-owner {
    display: flex;
    justify-content: center;
@@ -340,6 +333,7 @@ hr.separator {
    padding: 0 10px;
    flex-direction: row;
    justify-content: space-between;
+   align-items: center;
    .__page-form {
       input,
       button {
@@ -354,16 +348,12 @@ hr.separator {
       }
       button {
          margin-left: 5px;
+         transition: background-color 0.3s ease-out;
+         &:hover {
+            background-color: $third-app-color-dark;
+            cursor: pointer;
+         }
       }
    }
-   .__details {
-      // justify-self: flex-start;
-   }
-}
-.align-center {
-   align-self: center;
-}
-.bold {
-   font-weight: bold;
 }
 </style>
