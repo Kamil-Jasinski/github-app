@@ -8,11 +8,16 @@
          :bgColor="'transparent'"
          :borderColor="'transparent'"
          :boxShadow="'none'"
+         v-if="!isLoading"
       >
-         <SearchBar />
+         <SearchBar
+            :placeholder="this.userLogin"
+            :isHomepage="false"
+            @clicked="setContent"
+         />
       </TheContainer>
 
-      <div class="userRepos">
+      <div v-if="!isLoading" class="userRepos">
          <!-- USER CARD -->
          <section class="repos-owner">
             <TheContainer
@@ -22,8 +27,18 @@
             >
                <div class="owner-card">
                   <div class="avatar">
-                     <img v-if="userAvatarUrl" :src="userAvatarUrl" alt="" />
-                     <img v-else src="@/assets/logo.png" alt="" />
+                     <img
+                        @click="goToUserPage"
+                        v-if="userAvatarUrl"
+                        :src="userAvatarUrl"
+                        alt=""
+                     />
+                     <img
+                        @click="goToUserPage"
+                        v-else
+                        src="@/assets/logo.png"
+                        alt=""
+                     />
                   </div>
                   <div class="details">
                      <h2 v-if="userName" class="align-self-center name">
@@ -97,11 +112,6 @@
                      <button type="submit">GO</button>
                   </div>
                </form>
-
-               <TheModal v-if="showErrorModal" @close="setShowErrorModal">
-                  <h3 slot="header">Error</h3>
-                  <p slot="body">{{ errorMessage }}</p>
-               </TheModal>
             </div>
 
             <!-- Repos -->
@@ -140,6 +150,22 @@
             </TheRepo>
          </section>
       </div>
+
+      <TheModal v-if="showErrorModal" @close="closeErrorModal">
+         <h3 slot="header">Error</h3>
+         <p slot="body">{{ errorMessage }}</p>
+         <p slot="footer">
+            <button
+               class="modal-default-button"
+               @click="
+                  $emit('close');
+                  handleError();
+               "
+            >
+               Close
+            </button>
+         </p>
+      </TheModal>
    </div>
 </template>
 
@@ -162,89 +188,172 @@ import TheRepo from "@/components/core/TheRepo.vue";
 })
 export default class UserRepos extends Vue {
    goToPage = 1;
-   get showErrorModal() {
-      return this.$store.getters.showErrorModal;
+   userAvatarUrl = "";
+   repos = [];
+   userName = this.$store.getters.userName;
+
+   async goToUserPage() {
+      this.$router.push({ name: "UserPage", params: { user: this.userLogin } });
    }
 
-   setShowErrorModal() {
+   handleError() {
+      this.$store.commit("SET_IS_LOADING", {
+         showErrorModal: false,
+      });
       this.$store.commit("SET_SHOW_ERROR_MODAL", {
          showErrorModal: false,
       });
+      this.$store.commit("SET_CURRENT_USER_LOGIN", {
+         login: "",
+      });
+      this.$router.push({ name: "Home" });
    }
 
-   get errorMessage() {
-      return this.$store.getters.errorMessage;
+   // PAGER & FILTER
+   get order() {
+      return this.$store.getters.searchOrder;
    }
-   @Watch("userLogin")
-   resetPage() {
-      this.goToPage = 1;
+   get sorting() {
+      return this.$store.getters.searchSorting;
    }
-
+   get perPage() {
+      return this.$store.getters.currentPerPage;
+   }
    async pager() {
-      // let userName;
-      console.log("Go to page", this.goToPage);
-
       try {
          const repos = await Vue.axios.get(
-            // `https://api.github.com/users/${this.userLogin}/repos?page=${this.goToPage}&per_page=${this.currentPerPage}`
-            `https://api.github.com/users/${this.userLogin}/repos?page=${this.goToPage}&per_page=${this.currentPerPage}`
+            `https://api.github.com/users/${this.userLogin}/repos?page=${this.goToPage}&per_page=${this.perPage}`
          );
 
          //Store user repos
-         this.$store.commit("SET_USER_REPOS", { repos: repos.data });
+         this.repos = repos.data;
 
          //Store current page
          this.$store.commit("SET_CURRENT_PAGE", {
             currentPage: this.goToPage,
          });
-      } finally {
-         //  console.log(this.$store.getters.userRepo);
+      } catch (err) {
+         console.warn(err.message);
       }
    }
-
+   get currentPage() {
+      return this.$store.getters.currentPage;
+   }
    get userMaxReposPages() {
       return this.$store.getters.userMaxReposPages;
    }
 
-   get currentPage() {
-      return this.$store.getters.currentPage;
+   // ERROR MODAL
+   get showErrorModal() {
+      return this.$store.getters.showErrorModal;
    }
-   get currentPerPage() {
-      return this.$store.getters.currentPerPage;
+   closeErrorModal() {
+      this.$store.commit("SET_SHOW_ERROR_MODAL", {
+         showErrorModal: false,
+      });
    }
-   get currentUser() {
-      return this.$route.params.userName;
+   get errorMessage() {
+      return this.$store.getters.errorMessage;
+   }
+
+   // CHANGE PAGE CONTENT ON USER CHANGE
+   @Watch("userLogin")
+   resetPage() {
+      this.goToPage = 1;
+   }
+   @Watch("userLogin")
+   async setContent() {
+      let userMaxReposPages;
+      this.$store.commit("SET_IS_LOADING", {
+         isLoading: true,
+      });
+      try {
+         let userResponse;
+         let repos;
+         if (this.userLogin) {
+            // GET REPOS
+            repos = await Vue.axios.get(
+               `https://api.github.com/users/${this.userLogin}/repos?sort=${this.sorting}&direction=${this.order}&per_page=${this.perPage}&page=${this.goToPage}`
+            );
+
+            //  GET USER
+            userResponse = await Vue.axios.get(
+               "https://api.github.com/users/" + this.userLogin
+            );
+         }
+
+         //Store user
+         this.$store.commit("SET_USER", { user: userResponse.data });
+
+         //Store User Name
+         if (userResponse.data.name) {
+            this.$store.commit("SET_USER_NAME", {
+               name: userResponse.data.name,
+            });
+         } else {
+            this.$store.commit("SET_USER_NAME", { name: "" });
+         }
+
+         //Store user avatar URL
+         this.userAvatarUrl = userResponse.data.avatar_url;
+
+         //Store current page
+         this.$store.commit("SET_CURRENT_PAGE", {
+            currentPage: this.goToPage,
+         });
+
+         //Store user repos max page
+         const userReposNumber = userResponse.data.public_repos;
+         if (this.perPage) {
+            userMaxReposPages = Math.ceil(userReposNumber / this.perPage);
+         } else {
+            userMaxReposPages = 1;
+         }
+         this.$store.commit("SET_USER_MAX_REPOS_PAGES", {
+            userMaxReposPages: userMaxReposPages,
+         });
+
+         //SET_CURRENT_USER_LOGIN
+         this.$store.commit("SET_CURRENT_USER_LOGIN", {
+            login: this.userLogin,
+         });
+
+         //Store user repos
+         this.repos = repos.data;
+
+         //Loading Off
+         this.$store.commit("SET_IS_LOADING", {
+            isLoading: false,
+         });
+      } catch (error) {
+         console.warn(error.message);
+         this.$store.commit("SET_ERROR_MESSAGE", {
+            errorMessage: error.message,
+         });
+         this.$store.commit("SET_SHOW_ERROR_MODAL", {
+            showErrorModal: true,
+         });
+      }
    }
 
    get userLogin() {
-      return this.$store.getters.userLogin;
+      return this.$route.params.user;
    }
-
-   get userName() {
-      return this.$store.getters.userName;
-   }
-
    get user() {
       return this.$store.getters.user;
    }
 
-   get repos() {
-      return this.$store.getters.userRepos;
-   }
-   get userAvatarUrl() {
-      return this.$store.getters.userAvatarUrl;
-   }
-
-   mounted() {
-      console.log(this.repos);
-   }
-
    beforeMount() {
-      // TODO: przerobić na ID użytkownika if id === null
-      if (this.repos.length === 0) {
-         this.$router.push({ name: "Home" });
-         console.log("brak repo - cofnij do wyszukiwarki");
-      }
+      this.setContent();
+   }
+
+   get isLoading() {
+      return this.$store.getters.isLoading;
+   }
+
+   beforeDestroy() {
+      // Clean Repo []
+      this.repos = [];
    }
 }
 </script>
@@ -252,6 +361,7 @@ export default class UserRepos extends Vue {
 <style lang="scss" scoped>
 .userRepos {
    display: flex;
+   flex-direction: row;
    margin: auto auto;
 }
 .wrapper {
@@ -282,6 +392,11 @@ export default class UserRepos extends Vue {
          margin: 50px 0;
          border: 2px solid $main-app-color-dark;
          background-color: $main-app-color-dark;
+         cursor: pointer;
+         box-shadow: 2px 2px 10px 1px #000;
+         &:hover {
+            transform: scale(1.05);
+         }
          img {
             min-width: 100%;
             max-width: 100%;
@@ -292,7 +407,6 @@ export default class UserRepos extends Vue {
          display: flex;
          flex-direction: column;
          .name {
-            // align-self: center;
             font-size: 3rem;
             margin-top: 20px;
             color: $third-app-color-dark;
