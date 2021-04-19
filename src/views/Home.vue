@@ -1,6 +1,6 @@
 <template>
    <div class="home">
-      <SearchBar :changeRoute="true" />
+      <SearchBar />
    </div>
 </template>
 

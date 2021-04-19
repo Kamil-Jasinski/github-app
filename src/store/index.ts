@@ -1,7 +1,7 @@
 import Vue from "vue";
 import Vuex from "vuex";
 import axios from "axios";
-import firebase from "firebase";
+
 
 Vue.use(Vuex);
 
@@ -11,13 +11,14 @@ export default new Vuex.Store({
     user: [],
     userName: '',
     userLogin: '',
-    userRepos: [],
-    userAvatarUrl: '',
+    searchSorting: '',
+    searchOrder: '',
     currentPage: 1,
     currentPerPage: 5,
     userMaxReposPages: 0,
     errorMessage: '',
-    showErrorModal: false
+    showErrorModal: false,
+    isLoading: false
  
   },
   mutations: {
@@ -27,14 +28,14 @@ export default new Vuex.Store({
     SET_USER_NAME(state, payload) {
       state.userName = payload.name;
     },
-    SET_USER_LOGIN(state, payload) {
+    SET_CURRENT_USER_LOGIN(state, payload) {
       state.userLogin = payload.login;
     },
-    SET_USER_REPOS(state, payload) {
-      state.userRepos = payload.repos;
+    SET_SEARCH_SORTING(state, payload) {
+      state.searchSorting = payload.sorting;
     },
-    SET_USER_AVATAR_URL(state, payload) {
-      state.userAvatarUrl = payload.URL;
+    SET_SEARCH_ORDER(state, payload) {
+      state.searchOrder = payload.order;
     },
     SET_CURRENT_PAGE(state, payload) {
       state.currentPage = payload.currentPage;
@@ -51,6 +52,9 @@ export default new Vuex.Store({
     SET_SHOW_ERROR_MODAL(state, payload) {
       state.showErrorModal = payload.showErrorModal;
     },
+    SET_IS_LOADING(state, payload) {
+      state.isLoading = payload.isLoading;
+    },
   },
   actions: {},
   modules: {},
@@ -64,11 +68,11 @@ export default new Vuex.Store({
     userLogin: (state) => {
       return state.userLogin;
     },
-    userRepos: (state) => {
-      return state.userRepos;
+    searchSorting: (state) => {
+      return state.searchSorting;
     },
-    userAvatarUrl: (state) => {
-      return state.userAvatarUrl;
+    searchOrder: (state) => {
+      return state.searchOrder;
     },
     currentPage: (state) => {
       return state.currentPage;
@@ -84,6 +88,9 @@ export default new Vuex.Store({
     },
     showErrorModal: (state) => {
       return state.showErrorModal;
+    },
+    isLoading: (state) => {
+      return state.isLoading;
     },
   },
 });

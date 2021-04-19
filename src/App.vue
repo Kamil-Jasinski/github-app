@@ -1,17 +1,22 @@
 <template>
-  <div id="app">
-    <div id="logo-container">
-      <img class="logo" alt="Vue logo" src="./assets/logo.png" />
-    </div>
-    <router-view />
-  </div>
+   <div id="app">
+      <div id="logo-container">
+         <img class="logo" alt="Vue logo" src="./assets/logo.png" />
+      </div>
+      <TheLoader v-if="isLoading" />
+      <router-view />
+   </div>
 </template>
 
 <script lang="ts">
 import { Vue, Component } from "vue-property-decorator";
 
 @Component
-export default class app extends Vue {}
+export default class app extends Vue {
+   get isLoading() {
+      return this.$store.getters.isLoading;
+   }
+}
 </script>
 
 <style lang="scss">
@@ -20,38 +25,38 @@ export default class app extends Vue {}
 *,
 html,
 body {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Open Sans", sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #fff;
+   margin: 0;
+   padding: 0;
+   box-sizing: border-box;
+   font-family: "Open Sans", sans-serif;
+   -webkit-font-smoothing: antialiased;
+   -moz-osx-font-smoothing: grayscale;
+   color: #fff;
 }
 
 body {
-  background-color: #24292e;
+   background-color: #24292e;
 }
 #app {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-content: center;
-  min-height: 100vh;
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   align-content: center;
+   min-height: 100vh;
 }
 
 #logo-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  padding: 50px 0;
-    img{
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   width: 100%;
+   padding: 50px 0;
+   img {
       width: 200px;
-    }
+   }
 }
 
 ul {
-  list-style: none;
+   list-style: none;
 }
 </style>
