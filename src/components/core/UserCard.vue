@@ -1,8 +1,18 @@
 <template>
    <div class="owner-card">
       <div class="avatar">
-         <img v-if="userAvatarUrl" :src="userAvatarUrl" alt="" />
-         <img v-else src="@/assets/logo.png" alt="" />
+         <img
+            v-if="userAvatarUrl"
+            :src="userAvatarUrl"
+            alt="User Avatar"
+            @click="goToUserPage"
+         />
+         <img
+            v-else
+            src="@/assets/logo.png"
+            alt="User Avatar"
+            @click="goToUserPage"
+         />
       </div>
 
       <div class="details">
@@ -28,6 +38,11 @@ export default class UserCard extends Vue {
    @Prop({ default: null }) userAvatarUrl;
    @Prop({ default: null }) userLogin;
    @Prop({ default: null }) userName;
+
+   async goToUserPage() {
+      // Go to USER PAGE
+      this.$router.push({ name: "UserPage", params: { user: this.userLogin } });
+   }
 }
 </script>
 
@@ -40,12 +55,6 @@ export default class UserCard extends Vue {
    margin: 20px auto;
    background-color: $main-app-color-light;
    width: 800px;
-   &:hover {
-      .name,
-      .login {
-         color: $third-app-color-dark !important;
-      }
-   }
 
    .avatar {
       align-self: center;
@@ -59,13 +68,16 @@ export default class UserCard extends Vue {
       border: 2px solid $main-app-color-light;
       background-color: $main-app-color-dark;
       cursor: pointer;
-   }
-   img {
-      min-width: 100%;
-      max-width: 100%;
-      opacity: 0.9;
-      &:hover {
-         opacity: 1;
+      transition: all 0.3s ease-in-out;
+      box-shadow: 0 0 15px 1px rgba(0, 0, 0, 0.8);
+      img {
+         min-width: 100%;
+         max-width: 100%;
+         opacity: 0.8;
+         &:hover {
+            opacity: 1;
+            transform: scale(1.05);
+         }
       }
    }
 
