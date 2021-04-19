@@ -3,12 +3,15 @@
       class="core-title-container"
       :style="{
          width: width,
+         padding: padding,
          margin: margin,
          backgroundColor: bgColor,
          borderColor: borderColor,
       }"
    >
-      <h2 class="core-title">
+      <h2 class="core-title" :style="{
+         color: color
+      }">
          <slot></slot>
       </h2>
    </div>
@@ -23,6 +26,8 @@ export default class TheTitle extends Vue {
    @Prop({ default: "10px" }) margin;
    @Prop({ default: null }) bgColor;
    @Prop({ default: null }) borderColor;
+   @Prop({ default: null }) color;
+   @Prop({ default: '40px' }) padding;
 }
 </script>
 <style lang="scss">
