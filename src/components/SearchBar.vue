@@ -3,9 +3,15 @@
       <form>
          <span>
             <!-- User Name  -->
-            <input type="text" placeholder="User Name..." v-model="userName" />
+            <input type="text" :placeholder="placeholder" v-model="userName" />
             <!-- <span>{{ selectedSorting }}</span> -->
-            <button @click.prevent="getUserAndRepos" type="submit">
+            <button
+               @click.prevent="
+                  goToUserReposPage();
+                  $emit('clicked');
+               "
+               type="submit"
+            >
                Search
             </button>
          </span>
@@ -46,118 +52,65 @@
                </select>
             </div>
          </section>
+
+         <p class="search-notify" v-if="showNotify">{{ notify }}</p>
       </form>
    </div>
 </template>
 
 <script>
-import { Component, Vue, Prop } from "vue-property-decorator";
+import { Component, Vue, Prop, Watch } from "vue-property-decorator";
 
 @Component({
    components: {},
 })
 export default class SearchBar extends Vue {
-   @Prop({ default: false }) changeRoute;
+   @Prop({ default: true }) isHomepage;
+   @Prop({ default: "User name..." }) placeholder;
+   userName = ""; // from input to route @param
+   perPage = 5;
 
-   userName = "";
    sorting = "";
-   page = 1;
-   perPage = this.$store.getters.currentPerPage;
    order = "";
 
-   async getUserAndRepos() {
-      let userName;
+   showNotify = false;
+   notify = "";
+
+   async goToUserReposPage() {
       let currentUserLogin = this.$store.getters.userLogin;
-      const currentUser = this.$store.getters.currentUser;
-      let userMaxReposPages;
+      this.showNotify = false;
 
-      //Check if user input is not empty
-      if (!this.userName) {
-         console.log("User Name nie może być pusty");
-         return false;
+      // Go to user repos page - changes route only if currently searched user is defferent from userName from input
+      if (this.userName !== currentUserLogin && this.userName !== "") {
+         this.$router.push({
+            name: "UserRepos",
+            params: { user: this.userName },
+         });
       }
-
-      try {
-         // GET REPOS
-         const repos = await Vue.axios.get(
-            `https://api.github.com/users/${this.userName}/repos?sort=${this.sorting}&direction=${this.order}&per_page=${this.perPage}&page=${this.page}`
-         );
-         //  GET USER
-         const userResponse = await Vue.axios.get(
-            "https://api.github.com/users/" + this.userName
-         );
-
-         //Store user
-         this.$store.commit("SET_USER", { user: userResponse.data });
-         userName = userResponse.data.login;
-
-         //Store User Name
-         if (userResponse.data.name) {
-            this.$store.commit("SET_USER_NAME", {
-               name: userResponse.data.name,
-            });
-         } else {
-            this.$store.commit("SET_USER_NAME", { name: "" });
-         }
-
-         //Store User Login
-         if (userResponse.data.login) {
-            this.$store.commit("SET_USER_LOGIN", {
-               login: userResponse.data.login,
-            });
-         } else {
-            this.$store.commit("SET_USER_LOGIN", { login: "" });
-         }
-
-         // Check is current user = user from input
-         if (this.userName !== currentUserLogin) {
-            this.$store.commit("SET_CURRENT_PAGE", {
-               currentPage: 1,
-            });
-         }
-
-         //Store user repos
-         let userAvatarUrl = userResponse.data.avatar_url;
-         this.$store.commit("SET_USER_AVATAR_URL", {
-            URL: userAvatarUrl,
-         });
-
-         //Store current page
-         this.$store.commit("SET_CURRENT_PAGE", {
-            currentPage: this.page,
-         });
-
-         //Store user repos max page
-         const userReposNumber = userResponse.data.public_repos;
-         if (this.perPage) {
-            userMaxReposPages = Math.ceil(userReposNumber / this.perPage);
-         } else {
-            console.log("ELSE");
-            userMaxReposPages = 1;
-         }
-
-         this.$store.commit("SET_USER_MAX_REPOS_PAGES", {
-            userMaxReposPages: userMaxReposPages,
-         });
-
-         //Store user avatar URL
-         this.$store.commit("SET_USER_REPOS", { repos: repos.data });
-
-         // Go to user repos page
-         if (this.changeRoute) {
-            this.$router.push({ name: "UserRepos" });
-         }
-      } catch (error) {
-         console.log(error.message);
-         this.$store.commit("SET_ERROR_MESSAGE", {
-            errorMessage: error.message,
-         });
-         this.$store.commit("SET_SHOW_ERROR_MODAL", {
-            showErrorModal: true,
-         });
-      } finally {
-         //  console.log(this.$store.getters.userRepo);
+      if (this.userName === "" && this.isHomepage) {
+         this.showNotify = true;
+         this.notify = "Input can't be empty.";
       }
+   }
+
+   @Watch("perPage")
+   updatePerPageValue() {
+      this.$store.commit("SET_CURRENT_PER_PAGE", {
+         currentPerPage: this.perPage,
+      });
+   }
+
+   @Watch("order")
+   updateOrderValue() {
+      this.$store.commit("SET_SEARCH_ORDER", {
+         order: this.order,
+      });
+   }
+   @Watch("sorting")
+   updateSortingValue() {
+      this.$store.commit("SET_SEARCH_SORTING", {
+         sorting: this.sorting,
+      });
    }
 }
 </script>
@@ -228,6 +181,12 @@ export default class SearchBar extends Vue {
 }
 .filter {
    margin: 0 20px;
+}
+
+.search-notify {
+   padding: 10px;
+   color: red;
+   text-transform: uppercase;
 }
 
 /* Hover title border */
