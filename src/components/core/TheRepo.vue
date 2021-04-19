@@ -33,20 +33,23 @@
       </div>
 
       <slot name="footer">
-         <!-- default footer -->
-         <button class="card-button" @click="openCommitsModal = true">
-            Commits
-         </button>
-         <button class="card-button" @click="openContributorsModal = true">
-            Contributors
-         </button>
+         <section class="footer">
+            <!-- default footer -->
+            <button class="card-button" @click="openCommitsModal = true">
+               Commits
+            </button>
+            <button class="card-button" @click="openContributorsModal = true">
+               Contributors
+            </button>
+         </section>
       </slot>
 
+      <!-- COMMITS -->
       <TheModal v-if="openCommitsModal" @close="openCommitsModal = false">
          <template #header>Commits for: {{ repoName }}</template>
 
          <template #body>
-            <ul>
+            <ul v-if="commits.length > 0">
                <li v-for="item in commits" :key="item.node_id">
                   <div class="commit-body">
                      <div>
@@ -61,9 +64,11 @@
                   </div>
                </li>
             </ul>
+            <TheLoader v-else />
          </template>
       </TheModal>
 
+      <!-- CONTRIBUTORS -->
       <TheModal
          v-if="openContributorsModal"
          @close="openContributorsModal = false"
@@ -71,7 +76,7 @@
          <template #header>Contributors for: {{ repoName }}</template>
 
          <template #body>
-            <ul>
+            <ul v-if="contributors.length > 0">
                <li v-for="item in contributors" :key="item.id">
                   <UserCard
                      :userLogin="item.login"
@@ -79,6 +84,7 @@
                   />
                </li>
             </ul>
+            <TheLoader v-if="contributors.length <= 0" />
          </template>
       </TheModal>
    </div>
@@ -121,24 +127,23 @@ export default class TheRepo extends Vue {
                `https://api.github.com/repos/${this.userLogin}/${this.repoName}/commits`
             );
             this.commits = commits.data;
-            console.log(this.commits);
-         } finally {
-            console.log();
+         } catch (err) {
+            console.warn(err.message);
          }
       }
    }
 
    @Watch("openContributorsModal")
    async getContributors() {
+      this.contributors = [];
       if (this.openContributorsModal) {
          try {
             const contributors = await Vue.axios.get(
                `https://api.github.com/repos/${this.userLogin}/${this.repoName}/contributors`
             );
             this.contributors = contributors.data;
-            console.log(this.contributors);
-         } finally {
-            console.log();
+         } catch (err) {
+            console.warn(err.message);
          }
       }
    }
@@ -167,21 +172,42 @@ export default class TheRepo extends Vue {
    margin: 5px 0;
    padding-left: 10px;
 }
-.card-button {
-   padding: 5px;
-   background-color: $third-app-color-dark;
-   transition: background-color 0.3s ease-out;
-   margin: 5px;
-   color: $main-app-color-dark;
-   font-size: 0.8rem;
-   font-weight: bold;
-   letter-spacing: 0.05rem;
-   border-radius: 10px;
-   outline: none;
-   border: none;
-   &:hover {
-      background-color: $third-app-color-light;
-      cursor: pointer;
+
+.footer {
+   display: flex;
+   justify-content: flex-end;
+   margin-top: 50px;
+
+   .card-button {
+      padding: 5px;
+      background-color: transparent;
+      margin: 5px;
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: bold;
+      letter-spacing: 0.05rem;
+      outline: none;
+      border: none;
+      position: relative;
+      &:hover {
+         cursor: pointer;
+         &::after {
+            width: 100%;
+            background-color: $third-app-color-dark;
+         }
+      }
+      &::after {
+         position: absolute;
+         left: 50%;
+         bottom: -5px;
+         transform: translateX(-50%);
+         content: "";
+         height: 1px;
+         width: 15px;
+         transition: all 0.3s ease;
+
+         background-color: $third-app-color-light;
+      }
    }
 }
 .commit-body {
