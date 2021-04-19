@@ -29,8 +29,8 @@
                   <div class="avatar">
                      <img
                         @click="goToUserPage"
-                        v-if="userAvatarUrl"
-                        :src="userAvatarUrl"
+                        v-if="userData.avatar_url"
+                        :src="userData.avatar_url"
                         alt=""
                      />
                      <img
@@ -41,18 +41,18 @@
                      />
                   </div>
                   <div class="details">
-                     <h2 v-if="userName" class="align-self-center name">
-                        {{ userName }}
+                     <h2 v-if="userData.name" class="align-self-center name">
+                        {{ userData.name }}
                      </h2>
                      <h3
-                        v-if="userLogin && userName"
+                        v-if="userLogin && userData.name"
                         name="login"
                         class="align-self-center login"
                      >
                         ({{ userLogin }})
                      </h3>
                      <h2
-                        v-else-if="!userName"
+                        v-else-if="!userData.name"
                         name="login"
                         class="align-self-center name"
                      >
@@ -64,19 +64,19 @@
                      <hr class="separator" />
                      <p name="public-repos-number">
                         Public repositories
-                        <span class="bold">{{ user.public_repos }}</span>
+                        <span class="bold">{{ userData.public_repos }}</span>
                      </p>
                      <p name="followers-number">
                         Followed by
-                        <span class="bold">{{ user.followers }}</span> github
-                        users.
+                        <span class="bold">{{ userData.followers }}</span>
+                        github users.
                      </p>
                      <p name="following-number">
                         Following
-                        <span class="bold">{{ user.following }}</span> github
-                        users.
+                        <span class="bold">{{ userData.following }}</span>
+                        github users.
                      </p>
-                     <p name="email">{{ user.email }}</p>
+                     <p name="email">{{ userData.email }}</p>
                   </div>
                </div>
             </TheContainer>
@@ -86,11 +86,14 @@
          <section class="user-repos-list">
             <!-- Header -->
             <TheTitle v-if="repos.length > 0"
-               >{{ user.name ? user.name : user.login }} repositories</TheTitle
+               >{{
+                  userData.name ? userData.name : userData.login
+               }}
+               repositories</TheTitle
             >
             <TheTitle v-else
-               >{{ user.name ? user.name : user.login }} have no repositories to
-               show</TheTitle
+               >{{ userData.name ? userData.name : userData.login }} have no
+               repositories to show</TheTitle
             >
             <!-- Pager -->
             <div v-if="repos.length > 0" class="pager">
@@ -176,6 +179,9 @@ import TheTitle from "@/components/core/TheTitle.vue";
 import SearchBar from "@/components/SearchBar.vue";
 import TheModal from "@/components/core/TheModal.vue";
 import TheRepo from "@/components/core/TheRepo.vue";
+import RepositoryService from "@/services/RepositoryService";
+import UserService from "@/services/UserService";
+import ErrorService from "@/services/ErrorService";
 
 @Component({
    components: {
@@ -188,9 +194,11 @@ import TheRepo from "@/components/core/TheRepo.vue";
 })
 export default class UserRepos extends Vue {
    goToPage = 1;
-   userAvatarUrl = "";
    repos = [];
-   userName = this.$store.getters.userName;
+   userData = [];
+   get userLogin() {
+      return this.$route.params.user;
+   }
 
    async goToUserPage() {
       this.$router.push({ name: "UserPage", params: { user: this.userLogin } });
@@ -207,6 +215,10 @@ export default class UserRepos extends Vue {
          login: "",
       });
       this.$router.push({ name: "Home" });
+   }
+
+   get isLoading() {
+      return this.$store.getters.isLoading;
    }
 
    // PAGER & FILTER
@@ -242,7 +254,6 @@ export default class UserRepos extends Vue {
    get userMaxReposPages() {
       return this.$store.getters.userMaxReposPages;
    }
-
    // ERROR MODAL
    get showErrorModal() {
       return this.$store.getters.showErrorModal;
@@ -272,30 +283,22 @@ export default class UserRepos extends Vue {
          let repos;
          if (this.userLogin) {
             // GET REPOS
-            repos = await Vue.axios.get(
-               `https://api.github.com/users/${this.userLogin}/repos?sort=${this.sorting}&direction=${this.order}&per_page=${this.perPage}&page=${this.goToPage}`
+            repos = await RepositoryService.getRepos(
+               this.userLogin,
+               this.sorting,
+               this.order,
+               this.perPage,
+               this.goToPage
             );
 
             //  GET USER
-            userResponse = await Vue.axios.get(
-               "https://api.github.com/users/" + this.userLogin
-            );
+            userResponse = await UserService.getUser(this.userLogin);
          }
 
-         //Store user
-         this.$store.commit("SET_USER", { user: userResponse.data });
-
-         //Store User Name
-         if (userResponse.data.name) {
-            this.$store.commit("SET_USER_NAME", {
-               name: userResponse.data.name,
-            });
-         } else {
-            this.$store.commit("SET_USER_NAME", { name: "" });
-         }
-
-         //Store user avatar URL
-         this.userAvatarUrl = userResponse.data.avatar_url;
+         //Save user repos
+         this.repos = repos.data;
+         //Save userData
+         this.userData = userResponse.data;
 
          //Store current page
          this.$store.commit("SET_CURRENT_PAGE", {
@@ -313,13 +316,10 @@ export default class UserRepos extends Vue {
             userMaxReposPages: userMaxReposPages,
          });
 
-         //SET_CURRENT_USER_LOGIN
+         //SET_CURRENT_USER_LOGIN; to compare with user from input (if it is same page will not reload)
          this.$store.commit("SET_CURRENT_USER_LOGIN", {
             login: this.userLogin,
          });
-
-         //Store user repos
-         this.repos = repos.data;
 
          //Loading Off
          this.$store.commit("SET_IS_LOADING", {
@@ -336,19 +336,8 @@ export default class UserRepos extends Vue {
       }
    }
 
-   get userLogin() {
-      return this.$route.params.user;
-   }
-   get user() {
-      return this.$store.getters.user;
-   }
-
    beforeMount() {
       this.setContent();
-   }
-
-   get isLoading() {
-      return this.$store.getters.isLoading;
    }
 
    beforeDestroy() {

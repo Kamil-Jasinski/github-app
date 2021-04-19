@@ -1,6 +1,6 @@
 import Vue from "vue";
 import Vuex from "vuex";
-import axios from "axios";
+
 
 
 Vue.use(Vuex);
@@ -8,8 +8,8 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     apiKey: process.env.VUE_APP_API_KEY,
-    user: [],
-    userName: '',
+
+    
     userLogin: '',
     searchSorting: '',
     searchOrder: '',
@@ -22,12 +22,8 @@ export default new Vuex.Store({
  
   },
   mutations: {
-    SET_USER(state, payload) {
-      state.user = payload.user;
-    },
-    SET_USER_NAME(state, payload) {
-      state.userName = payload.name;
-    },
+  
+   
     SET_CURRENT_USER_LOGIN(state, payload) {
       state.userLogin = payload.login;
     },
@@ -59,12 +55,8 @@ export default new Vuex.Store({
   actions: {},
   modules: {},
   getters: {
-    user: (state) => {
-      return state.user;
-    },
-    userName: (state) => {
-      return state.userName;
-    },
+   
+   
     userLogin: (state) => {
       return state.userLogin;
     },
