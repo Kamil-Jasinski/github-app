@@ -1,24 +1,21 @@
-import Vue from 'vue';
+import Vue from "vue";
 
-export default new class RepositoryService
-{
-    
-   async getRepos(userLogin, sorting, order, perPage, goToPage) {          
-      try {
-         let repos;
+export default new (class RepositoryService {
+  async getCommits(userLogin, repoName, openCommitsModal) {
+    if (openCommitsModal) {
+      const commits = await Vue.axios.get(
+        `https://api.github.com/repos/${userLogin}/${repoName}/commits`
+      );
+      return commits.data;
+    }
+  }
 
-         if (userLogin) {
-            repos = await Vue.axios.get(
-               `https://api.github.com/users/${userLogin}/repos?sort=${sorting}&direction=${order}&per_page=${perPage}&page=${goToPage}`
-            );
-         }
-         
-         return repos;
-      } catch (error) {
-         console.warn(error.message);
-         
-         
-      }
-   }
-
-}
+  async getContributors(userLogin, repoName, openContributorsModal) {
+    if (openContributorsModal) {
+      const contributors = await Vue.axios.get(
+        `https://api.github.com/repos/${userLogin}/${repoName}/contributors`
+      );
+      return contributors.data;
+    }
+  }
+})();

@@ -13,9 +13,10 @@
          <SearchBar
             :placeholder="this.userLogin"
             :isHomepage="false"
-            @clicked="setContent"
+            @clicked="loadData"
          />
       </TheContainer>
+      <TheNav />
 
       <div v-if="!isLoading" class="userRepos">
          <!-- USER CARD -->
@@ -64,19 +65,27 @@
                      <hr class="separator" />
                      <p name="public-repos-number">
                         Public repositories
-                        <span class="bold">{{ userData.public_repos }}</span>
+                        <span class="bold">{{
+                           userData.public_repos ? userData.public_repos : "0"
+                        }}</span>
                      </p>
                      <p name="followers-number">
                         Followed by
-                        <span class="bold">{{ userData.followers }}</span>
+                        <span class="bold">{{
+                           userData.followers ? userData.followers : "0"
+                        }}</span>
                         github users.
                      </p>
                      <p name="following-number">
                         Following
-                        <span class="bold">{{ userData.following }}</span>
+                        <span class="bold">{{
+                           userData.following ? userData.following : "0"
+                        }}</span>
                         github users.
                      </p>
-                     <p name="email">{{ userData.email }}</p>
+                     <p v-if="userData.email" name="email">
+                        <font-awesome-icon icon="at" /> {{ userData.email }}
+                     </p>
                   </div>
                </div>
             </TheContainer>
@@ -117,7 +126,7 @@
                </form>
             </div>
 
-            <!-- Repos -->
+            <!-- Repos List -->
             <TheRepo
                v-for="repo in repos"
                :key="repo.id"
@@ -179,9 +188,8 @@ import TheTitle from "@/components/core/TheTitle.vue";
 import SearchBar from "@/components/SearchBar.vue";
 import TheModal from "@/components/core/TheModal.vue";
 import TheRepo from "@/components/core/TheRepo.vue";
-import RepositoryService from "@/services/RepositoryService";
 import UserService from "@/services/UserService";
-import ErrorService from "@/services/ErrorService";
+// import ErrorService from "@/services/ErrorService"; TODO
 
 @Component({
    components: {
@@ -200,7 +208,7 @@ export default class UserRepos extends Vue {
       return this.$route.params.user;
    }
 
-   async goToUserPage() {
+   goToUserPage() {
       this.$router.push({ name: "UserPage", params: { user: this.userLogin } });
    }
 
@@ -273,37 +281,60 @@ export default class UserRepos extends Vue {
       this.goToPage = 1;
    }
    @Watch("userLogin")
-   async setContent() {
-      let userMaxReposPages;
-      this.$store.commit("SET_IS_LOADING", {
-         isLoading: true,
+   async loadData() {
+      if (this.userLogin) {
+         // GET REPOS
+         this.getRepos();
+         //  GET USER
+         this.getUser();
+      }
+
+      //Store current page
+      this.$store.commit("SET_CURRENT_PAGE", {
+         currentPage: this.goToPage,
       });
+
+      //SET_CURRENT_USER_LOGIN; to compare with user from input (if it is same page will not reload)
+      this.$store.commit("SET_CURRENT_USER_LOGIN", {
+         login: this.userLogin,
+      });
+   }
+
+   async getRepos() {
+      this.setLoader(true);
       try {
-         let userResponse;
          let repos;
-         if (this.userLogin) {
-            // GET REPOS
-            repos = await RepositoryService.getRepos(
-               this.userLogin,
-               this.sorting,
-               this.order,
-               this.perPage,
-               this.goToPage
-            );
-
-            //  GET USER
-            userResponse = await UserService.getUser(this.userLogin);
-         }
-
-         //Save user repos
+         // GET REPOS
+         repos = await UserService.getUserRepos(
+            this.userLogin,
+            this.sorting,
+            this.order,
+            this.perPage,
+            this.goToPage
+         );
          this.repos = repos.data;
-         //Save userData
-         this.userData = userResponse.data;
 
-         //Store current page
-         this.$store.commit("SET_CURRENT_PAGE", {
-            currentPage: this.goToPage,
+         //Loading Off
+         this.setLoader(false);
+      } catch (err) {
+         this.setLoader(false);
+         console.warn(err.message);
+         this.$store.commit("SET_ERROR_MESSAGE", {
+            errorMessage: err.message,
          });
+         this.$store.commit("SET_SHOW_ERROR_MODAL", {
+            showErrorModal: true,
+         });
+      }
+   }
+
+   async getUser() {
+      let userResponse;
+      let userMaxReposPages;
+      this.setLoader(true);
+      try {
+         userResponse = await UserService.getUser(this.userLogin);
+         this.userData = userResponse.data;
 
          //Store user repos max page
          const userReposNumber = userResponse.data.public_repos;
@@ -315,34 +346,45 @@ export default class UserRepos extends Vue {
          this.$store.commit("SET_USER_MAX_REPOS_PAGES", {
             userMaxReposPages: userMaxReposPages,
          });
-
-         //SET_CURRENT_USER_LOGIN; to compare with user from input (if it is same page will not reload)
-         this.$store.commit("SET_CURRENT_USER_LOGIN", {
-            login: this.userLogin,
-         });
-
-         //Loading Off
-         this.$store.commit("SET_IS_LOADING", {
-            isLoading: false,
-         });
-      } catch (error) {
-         console.warn(error.message);
+         this.setLoader(false);
+      } catch (err) {
+         console.warn(err.message);
          this.$store.commit("SET_ERROR_MESSAGE", {
-            errorMessage: error.message,
+            errorMessage: err.message,
          });
          this.$store.commit("SET_SHOW_ERROR_MODAL", {
             showErrorModal: true,
          });
+         this.setLoader(false);
       }
    }
 
-   beforeMount() {
-      this.setContent();
+   setLoader(mode) {
+      if (mode) {
+         //Loading Off
+         this.$store.commit("SET_IS_LOADING", {
+            isLoading: true,
+         });
+      } else if (!mode) {
+         //Loading Off
+         this.$store.commit("SET_IS_LOADING", {
+            isLoading: false,
+         });
+      }
+   }
+
+   created() {
+      this.loadData();
    }
 
    beforeDestroy() {
       // Clean Repo []
       this.repos = [];
+
+      // Reset current user
+      this.$store.commit("SET_CURRENT_USER_LOGIN", {
+         login: "",
+      });
    }
 }
 </script>

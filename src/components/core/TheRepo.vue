@@ -94,6 +94,7 @@
 import { Component, Vue, Prop, Watch } from "vue-property-decorator";
 import TheModal from "@/components/core/TheModal.vue";
 import UserCard from "@/components/core/UserCard.vue";
+import RepositoryService from "@/services/RepositoryService";
 
 @Component({
    components: {
@@ -121,38 +122,45 @@ export default class TheRepo extends Vue {
 
    @Watch("openCommitsModal")
    async getCommits() {
-      if (this.openCommitsModal) {
-         try {
-            const commits = await Vue.axios.get(
-               `https://api.github.com/repos/${this.userLogin}/${this.repoName}/commits`
-            );
-            this.commits = commits.data;
-         } catch (err) {
-            console.warn(err.message);
-         }
+      try {
+         this.commits = await RepositoryService.getCommits(
+            this.userLogin,
+            this.repoName,
+            this.openCommitsModal
+         );
+      } catch (err) {
+         console.warn(err.message);
+         this.$store.commit("SET_ERROR_MESSAGE", {
+            errorMessage: err.message,
+         });
+         this.$store.commit("SET_SHOW_ERROR_MODAL", {
+            showErrorModal: true,
+         });
       }
    }
 
    @Watch("openContributorsModal")
    async getContributors() {
-      this.contributors = [];
-      if (this.openContributorsModal) {
-         try {
-            const contributors = await Vue.axios.get(
-               `https://api.github.com/repos/${this.userLogin}/${this.repoName}/contributors`
-            );
-            this.contributors = contributors.data;
-         } catch (err) {
-            console.warn(err.message);
-         }
+      try {
+         this.contributors = await RepositoryService.getContributors(
+            this.userLogin,
+            this.repoName,
+            this.openContributorsModal
+         );
+      } catch (err) {
+         console.warn(err.message);
+         this.$store.commit("SET_ERROR_MESSAGE", {
+            errorMessage: err.message,
+         });
+         this.$store.commit("SET_SHOW_ERROR_MODAL", {
+            showErrorModal: true,
+         });
       }
    }
 }
 </script>
 
 <style lang="scss">
-//style
-
 .core-repo-container {
    height: min-content;
 

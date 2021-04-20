@@ -2,19 +2,16 @@ import Vue from "vue";
 import App from "./App.vue";
 import router from "./router";
 import store from "./store";
-import axios from 'axios';
-import VueAxios from 'vue-axios'
+import axios from "axios";
+import VueAxios from "vue-axios";
 import VueLuxon from "vue-luxon";
-import TheLoader from '@/components/core/TheLoader.vue';
-Vue.component('TheLoader', TheLoader)
+import TheLoader from "@/components/core/TheLoader.vue";
+import TheNav from "@/components/core/TheNav.vue";
+Vue.component("TheLoader", TheLoader);
+Vue.component("TheNav", TheNav);
 
-Vue.use(VueAxios, axios)
+Vue.use(VueAxios, axios);
 Vue.use(VueLuxon);
-
-
-
-
-
 
 // FONT AWESOME
 import { faTwitter } from "@fortawesome/free-brands-svg-icons";
@@ -28,12 +25,10 @@ import {
   faFileWord,
   faAt,
   faArrowLeft,
-  faHome
-  
+  faHome,
 } from "@fortawesome/free-solid-svg-icons";
 
 library.add(
-  
   faUser,
   faUserClock,
   faMapMarkerAlt,
@@ -42,14 +37,12 @@ library.add(
   faAt,
   faArrowLeft,
   faHome
-
- 
 );
-Vue.component('font-awesome-icon', FontAwesomeIcon)
+Vue.component("font-awesome-icon", FontAwesomeIcon);
 
 Vue.config.productionTip = false;
 new Vue({
   router,
   store,
-  render: h => h(App)
-}).$mount('#app')
+  render: (h) => h(App),
+}).$mount("#app");

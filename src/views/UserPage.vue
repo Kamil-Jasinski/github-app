@@ -1,26 +1,12 @@
 <template>
    <div class="wrapper">
-      <nav v-if="!isLoading" class="main-nav">
-         <button
-            v-if="hasHistory()"
-            class="nav-button"
-            type="button"
-            @click="$router.go(-1)"
-         >
-            <font-awesome-icon class="nav-icon" icon="arrow-left" />
-            <span class="__nav-icon-text">Go Back</span>
-         </button>
-
-         <button
-            v-if="!hasHistory()"
-            type="button"
-            class="nav-button"
-            @click="$router.push('/')"
-         >
-            <font-awesome-icon class="nav-icon" icon="home" />
-            <span class="__nav-icon-text">Go Home</span>
-         </button>
-      </nav>
+      <!-- NAV -->
+      <TheNav
+         :routeName="'UserRepos'"
+         :user="userLogin"
+         :navText="'repositories'"
+         :paramUserLogin="userLogin"
+      />
 
       <!-- USER CARD -->
       <section v-if="!isLoading" class="repos-owner">
@@ -31,27 +17,31 @@
          >
             <div class="owner-card">
                <div class="card-header">
-                  <div class="avatar">
+                  <div class="avatar" ref="avatar">
                      <img v-if="userAvatarUrl" :src="userAvatarUrl" alt="" />
                      <img v-else src="@/assets/logo.png" alt="" />
                   </div>
 
                   <div class="git-info">
-                     <p name="public-repos-number">
+                     <p name="public-repos-number" class="git-info-el">
                         Public repositories
                         <span class="bold">{{ user.public_repos }}</span>
                      </p>
-                     <p name="followers-number">
+                     <p name="followers-number" class="git-info-el">
                         Followed by
                         <span class="bold">{{ user.followers }}</span> github
                         users
                      </p>
-                     <p name="following-number">
+                     <p name="following-number" class="git-info-el">
                         Following
                         <span class="bold">{{ user.following }}</span> github
                         users
                      </p>
-                     <p v-if="user.hireable" name="looking-for-work">
+                     <p
+                        v-if="user.hireable"
+                        name="looking-for-work"
+                        class="git-info-el"
+                     >
                         <span class="bold"
                            >{{ userName ? userName : userLogin }}
                         </span>
@@ -63,9 +53,11 @@
                <div class="details">
                   <h2 v-if="userName" class="align-self-center name">
                      <TheTitle
+                        v-if="userName"
                         :color="'#6CA7E1'"
                         :margin="'0'"
                         :padding="'20px 0'"
+                        ref="userName"
                         >{{ userName }}</TheTitle
                      >
                   </h2>
@@ -80,6 +72,7 @@
                      v-else-if="!userName"
                      name="login"
                      class="align-self-center name"
+                     ref="userLogin"
                   >
                      {{ userLogin }}
                   </h2>
@@ -90,57 +83,78 @@
                   <hr class="separator" />
 
                   <!-- BIO -->
-                  <p v-if="user.bio" name="bio">
+                  <div v-if="user.bio" class="text-line-wrapper" name="bio">
                      <font-awesome-icon class="user-card-icon" icon="user" />
-                     <span class="bold">Bio:</span> {{ user.bio }}
-                  </p>
+                     <p><span class="bold">Bio:</span> {{ user.bio }}</p>
+                  </div>
 
                   <!-- LOCATION -->
-                  <p v-if="user.location" name="location">
+                  <div
+                     v-if="user.location"
+                     class="text-line-wrapper"
+                     name="location"
+                  >
                      <font-awesome-icon
                         class="user-card-icon"
                         icon="map-marker-alt"
                      />
-                     <span class="bold">From:</span> {{ user.location }}
-                  </p>
+                     <p><span class="bold">From:</span> {{ user.location }}</p>
+                  </div>
 
                   <!-- BLOG -->
-                  <p v-if="user.blog" name="blog">
+                  <div v-if="user.blog" class="text-line-wrapper" name="blog">
                      <font-awesome-icon
                         class="user-card-icon"
                         icon="file-word"
                      />
-                     <span class="bold">Blog:</span>
-                     {{ user.blog }}
-                  </p>
+                     <p>
+                        <span class="bold">Blog:</span>
+                        {{ user.blog }}
+                     </p>
+                  </div>
 
                   <!-- TWITTER -->
-                  <p v-if="user.twitter_username" name="twitter_username">
+                  <div
+                     v-if="user.twitter_username"
+                     class="text-line-wrapper"
+                     name="twitter_username"
+                  >
                      <font-awesome-icon
                         class="user-card-icon"
                         :icon="['fab', 'twitter']"
                      />
-                     <span class="bold">Twitter:</span>
-                     {{ user.twitter_username }}
-                  </p>
+                     <p>
+                        <span class="bold">Twitter:</span>
+                        {{ user.twitter_username }}
+                     </p>
+                  </div>
 
                   <!-- CREATED AT -->
-                  <p v-if="user.created_at" name="created">
+                  <div
+                     v-if="user.created_at"
+                     class="text-line-wrapper"
+                     name="created"
+                  >
                      <font-awesome-icon
                         class="user-card-icon"
                         icon="user-clock"
                      />
-                     <span class="bold">Joined:</span>
-                     {{ $luxon(user.created_at) }}
-                  </p>
+                     <p>
+                        <span class="bold">Joined:</span>
+                        {{ $luxon(user.created_at) }}
+                     </p>
+                  </div>
 
                   <!-- EMAIL -->
-                  <p v-if="user.email" name="email">
+                  <div v-if="user.email" class="text-line-wrapper" name="email">
                      <font-awesome-icon class="user-card-icon" icon="at" />
-                     {{ user.email }}
-                  </p>
+                     <p>
+                        {{ user.email }}
+                     </p>
+                  </div>
                </div>
             </div>
+            <button @click="test">test</button>
          </TheContainer>
       </section>
 
@@ -163,11 +177,13 @@
 </template>
 
 <script>
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue, Watch } from "vue-property-decorator";
 import TheContainer from "@/components/core/TheContainer.vue";
 import TheTitle from "@/components/core/TheTitle.vue";
 import TheModal from "@/components/core/TheModal.vue";
 import TheRepo from "@/components/core/TheRepo.vue";
+import UserService from "@/services/UserService.js";
+import { gsap, CSSPlugin } from "gsap/all";
 
 @Component({
    components: {
@@ -178,9 +194,13 @@ import TheRepo from "@/components/core/TheRepo.vue";
    },
 })
 export default class UserPage extends Vue {
-   userName = "";
    userAvatarUrl = "";
+   userName = "";
    user = [];
+
+   test() {
+      console.log(this.$refs.avatar);
+   }
 
    // ERROR MODAL
    get showErrorModal() {
@@ -207,10 +227,6 @@ export default class UserPage extends Vue {
       this.$router.push({ name: "Home" });
    }
 
-   hasHistory() {
-      return window.history.length > 2;
-   }
-
    get isLoading() {
       return this.$store.getters.isLoading;
    }
@@ -220,26 +236,16 @@ export default class UserPage extends Vue {
    }
 
    async getUser() {
-      let user;
-      this.$store.commit("SET_IS_LOADING", {
-         isLoading: true,
-      });
-
-      //  GET USER
+      this.setLoader(true);
       try {
-         const userResponse = await Vue.axios.get(
-            "https://api.github.com/users/" + this.userLogin
-         );
-
-         user = userResponse.data;
-         this.userName = user.name;
-         this.userAvatarUrl = user.avatar_url;
-         this.user = user;
-
-         this.$store.commit("SET_IS_LOADING", {
-            isLoading: false,
-         });
+         let user;
+         user = await UserService.getUser(this.userLogin);
+         this.user = user.data;
+         this.userName = this.user.name;
+         this.userAvatarUrl = this.user.avatar_url;
+         this.setLoader(false);
       } catch (error) {
+         this.setLoader(false);
          console.warn(error.message);
          this.$store.commit("SET_ERROR_MESSAGE", {
             errorMessage: error.message,
@@ -250,8 +256,55 @@ export default class UserPage extends Vue {
       }
    }
 
+   setLoader(mode) {
+      if (mode) {
+         //Loading Off
+         this.$store.commit("SET_IS_LOADING", {
+            isLoading: true,
+         });
+      } else if (!mode) {
+         //Loading Off
+         this.$store.commit("SET_IS_LOADING", {
+            isLoading: false,
+         });
+      }
+   }
+
    beforeMount() {
       this.getUser();
+   }
+
+   // ANIMATIONS
+   // @Watch("isLoading")
+   animateUserPage() {
+      // IMG
+      // TEXT stagger
+      // name/login
+      //details
+
+      const img = this.$refs.avatar;
+      const gitInfo = this.$refs.gitInfo;
+      const userName = this.$refs.userName;
+      const userLogin = this.$refs.userLogin;
+
+      gsap.registerPlugin(CSSPlugin);
+      const userPageTimeline = gsap.timeline();
+      userPageTimeline
+         .fromTo(img, { x: -150 }, { x: 0, duration: 0.4 })
+         .fromTo(
+            ".git-info-el",
+            { autoAlpha: 0 },
+            { autoAlpha: 1, stagger: 0.1 }
+         )
+         .fromTo(
+            userName ? userName : userLogin,
+            { autoAlpha: 0, scale: 0.8 },
+            { autoAlpha: 1, scale: 1 }
+         );
+   }
+
+   updated() {
+      this.animateUserPage();
    }
 }
 </script>
@@ -319,52 +372,25 @@ export default class UserPage extends Vue {
             color: $third-app-color-light;
          }
 
-         p {
-            font-size: 1.5rem;
+         .text-line-wrapper {
+            display: flex;
+            flex-direction: row;
+            // align-items: center;
             padding: 10px;
+
+            p {
+               font-size: 1.5rem;
+               align-self: flex-start;
+            }
             .user-card-icon {
                margin-right: 10px;
-               width: 50px;
-               font-size: 1.3em;
+               min-width: 50px;
+               font-size: 1.8rem;
             }
             svg > path {
                color: $secondary-app-color-light;
             }
          }
-      }
-   }
-}
-
-.main-nav {
-   display: flex;
-   justify-content: flex-start;
-   align-items: center;
-
-   .nav-button {
-      display: flex;
-      align-items: center;
-      background-color: transparent;
-      outline: none;
-      border: none;
-      font-size: 2rem;
-      cursor: pointer;
-      &:hover {
-         .nav-icon > path {
-            color: $third-app-color-light !important;
-         }
-         .__nav-icon-text {
-            transform: translateX(10px);
-         }
-      }
-      .nav-icon {
-         transition: color 0.2s ease-in;
-      }
-      .__nav-icon-text {
-         margin-left: 10px;
-         font-size: 1rem;
-         text-transform: uppercase;
-         letter-spacing: 2px;
-         transition: transform 0.1s ease-in-out;
       }
    }
 }

@@ -68,16 +68,16 @@ export default class SearchBar extends Vue {
    @Prop({ default: true }) isHomepage;
    @Prop({ default: "User name..." }) placeholder;
    userName = ""; // from input to route @param
-   perPage = 5;
 
-   sorting = "";
-   order = "";
+   perPage = this.$store.getters.currentPerPage;
+   sorting = this.$store.getters.searchSorting;
+   order = this.$store.getters.searchOrder;
 
    showNotify = false;
    notify = "";
 
    async goToUserReposPage() {
-      let currentUserLogin = this.$store.getters.userLogin;
+      const currentUserLogin = this.$store.getters.userLogin;
       this.showNotify = false;
 
       // Go to user repos page - changes route only if currently searched user is defferent from userName from input
@@ -89,14 +89,14 @@ export default class SearchBar extends Vue {
       }
       if (this.userName === "" && this.isHomepage) {
          this.showNotify = true;
-         this.notify = "Input can't be empty.";
+         this.notify = "Input can't be empty";
       }
    }
 
    @Watch("perPage")
    updatePerPageValue() {
       this.$store.commit("SET_CURRENT_PER_PAGE", {
-         currentPerPage: this.perPage,
+         currentPerPage: parseInt(this.perPage),
       });
    }
 

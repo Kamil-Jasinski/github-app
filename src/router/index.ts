@@ -4,9 +4,6 @@ import Home from "../views/Home.vue";
 import UserRepos from "../views/UserRepos.vue";
 import UserPage from "../views/UserPage.vue";
 
-
-
-
 Vue.use(VueRouter);
 
 const routes: Array<RouteConfig> = [
@@ -27,7 +24,11 @@ const routes: Array<RouteConfig> = [
     props: true,
     component: UserPage,
   },
-  
+  {
+    path: "*",
+    name: "404",
+    component: Home,
+  },
 ];
 
 const router = new VueRouter({
@@ -37,5 +38,3 @@ const router = new VueRouter({
 });
 
 export default router;
-
-
