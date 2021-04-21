@@ -1,9 +1,7 @@
 <template>
    <div id="app">
-      <div id="logo-container">
-         <img class="logo" alt="Vue logo" src="./assets/logo.png" />
-      </div>
-      <TheLoader v-if="isLoading" />
+      <PortalTarget name="app-loader"></PortalTarget>
+      <PortalTarget name="app-modal"></PortalTarget>
       <router-view />
    </div>
 </template>
@@ -43,17 +41,6 @@ body {
    justify-content: center;
    align-content: center;
    min-height: 100vh;
-}
-
-#logo-container {
-   display: flex;
-   justify-content: center;
-   align-items: center;
-   width: 100%;
-   padding: 50px 0;
-   img {
-      width: 200px;
-   }
 }
 
 ul {
