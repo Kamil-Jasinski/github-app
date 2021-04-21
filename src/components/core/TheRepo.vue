@@ -45,11 +45,15 @@
       </slot>
 
       <!-- COMMITS -->
-      <TheModal v-if="openCommitsModal" @close="openCommitsModal = false">
+      <TheModal
+         v-if="openCommitsModal"
+         @close="openCommitsModal = false"
+         @modal-off="modalOff"
+      >
          <template #header>Commits for: {{ repoName }}</template>
 
          <template #body>
-            <ul v-if="commits.length > 0">
+            <ul v-if="commits">
                <li v-for="item in commits" :key="item.node_id">
                   <div class="commit-body">
                      <div>
@@ -64,7 +68,19 @@
                   </div>
                </li>
             </ul>
-            <TheLoader v-else />
+            <TheLoader v-if="!commits" />
+         </template>
+
+         <template #footer>
+            <button
+               class="modal-default-button"
+               @click="
+                  openCommitsModal = false;
+                  commits = [];
+               "
+            >
+               OK
+            </button>
          </template>
       </TheModal>
 
@@ -72,11 +88,12 @@
       <TheModal
          v-if="openContributorsModal"
          @close="openContributorsModal = false"
+         @modal-off="modalOff"
       >
          <template #header>Contributors for: {{ repoName }}</template>
 
          <template #body>
-            <ul v-if="contributors.length > 0">
+            <ul v-if="contributors">
                <li v-for="item in contributors" :key="item.id">
                   <UserCard
                      :userLogin="item.login"
@@ -84,7 +101,16 @@
                   />
                </li>
             </ul>
-            <TheLoader v-if="contributors.length <= 0" />
+            <TheLoader v-if="!contributors" />
+         </template>
+
+         <template #footer>
+            <button
+               class="modal-default-button"
+               @click="openContributorsModal = false"
+            >
+               OK
+            </button>
          </template>
       </TheModal>
    </div>
@@ -156,6 +182,11 @@ export default class TheRepo extends Vue {
             showErrorModal: true,
          });
       }
+   }
+
+   modalOff() {
+      this.commits = [];
+      this.contributors = [];
    }
 }
 </script>
