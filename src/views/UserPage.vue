@@ -51,19 +51,23 @@
                </div>
 
                <div class="details">
-                  <h2 v-if="userName" class="align-self-center name">
+                  <h2
+                     v-if="userName"
+                     ref="userName"
+                     class="align-self-center name"
+                  >
                      <TheTitle
                         v-if="userName"
                         :color="'#6CA7E1'"
                         :margin="'0'"
                         :padding="'20px 0'"
-                        ref="userName"
                         >{{ userName }}</TheTitle
                      >
                   </h2>
                   <h3
                      v-if="userLogin && userName"
                      name="login"
+                     ref="userLogin"
                      class="align-self-center login"
                   >
                      ({{ userLogin }})
@@ -72,89 +76,109 @@
                      v-else-if="!userName"
                      name="login"
                      class="align-self-center name"
-                     ref="userLogin"
+                     ref="userLoginAsName"
                   >
-                     {{ userLogin }}
+                     <TheTitle
+                        v-if="userLogin"
+                        :color="'#6CA7E1'"
+                        :margin="'0'"
+                        :padding="'20px 0'"
+                        >{{ userLogin }}</TheTitle
+                     >
                   </h2>
                   <h2 v-else name="login" class="align-self-center name">
                      User
                   </h2>
 
                   <hr class="separator" />
+                  <div class="additionalInfo" ref="additionalInfo">
+                     <!-- BIO -->
+                     <div
+                        v-if="user.bio"
+                        class="text-line-wrapper additional-info-el"
+                        name="bio"
+                     >
+                        <font-awesome-icon class="user-card-icon" icon="user" />
+                        <p><span class="bold">Bio:</span> {{ user.bio }}</p>
+                     </div>
 
-                  <!-- BIO -->
-                  <div v-if="user.bio" class="text-line-wrapper" name="bio">
-                     <font-awesome-icon class="user-card-icon" icon="user" />
-                     <p><span class="bold">Bio:</span> {{ user.bio }}</p>
-                  </div>
+                     <!-- LOCATION -->
+                     <div
+                        v-if="user.location"
+                        class="text-line-wrapper additional-info-el"
+                        name="location"
+                     >
+                        <font-awesome-icon
+                           class="user-card-icon"
+                           icon="map-marker-alt"
+                        />
+                        <p>
+                           <span class="bold">From:</span> {{ user.location }}
+                        </p>
+                     </div>
 
-                  <!-- LOCATION -->
-                  <div
-                     v-if="user.location"
-                     class="text-line-wrapper"
-                     name="location"
-                  >
-                     <font-awesome-icon
-                        class="user-card-icon"
-                        icon="map-marker-alt"
-                     />
-                     <p><span class="bold">From:</span> {{ user.location }}</p>
-                  </div>
+                     <!-- BLOG -->
+                     <div
+                        v-if="user.blog"
+                        class="text-line-wrapper additional-info-el"
+                        name="blog"
+                     >
+                        <font-awesome-icon
+                           class="user-card-icon"
+                           icon="file-word"
+                        />
+                        <p>
+                           <span class="bold">Blog:</span>
+                           {{ user.blog }}
+                        </p>
+                     </div>
 
-                  <!-- BLOG -->
-                  <div v-if="user.blog" class="text-line-wrapper" name="blog">
-                     <font-awesome-icon
-                        class="user-card-icon"
-                        icon="file-word"
-                     />
-                     <p>
-                        <span class="bold">Blog:</span>
-                        {{ user.blog }}
-                     </p>
-                  </div>
+                     <!-- TWITTER -->
+                     <div
+                        v-if="user.twitter_username"
+                        class="text-line-wrapper additional-info-el"
+                        name="twitter_username"
+                     >
+                        <font-awesome-icon
+                           class="user-card-icon"
+                           :icon="['fab', 'twitter']"
+                        />
+                        <p>
+                           <span class="bold">Twitter:</span>
+                           {{ user.twitter_username }}
+                        </p>
+                     </div>
 
-                  <!-- TWITTER -->
-                  <div
-                     v-if="user.twitter_username"
-                     class="text-line-wrapper"
-                     name="twitter_username"
-                  >
-                     <font-awesome-icon
-                        class="user-card-icon"
-                        :icon="['fab', 'twitter']"
-                     />
-                     <p>
-                        <span class="bold">Twitter:</span>
-                        {{ user.twitter_username }}
-                     </p>
-                  </div>
+                     <!-- CREATED AT -->
+                     <div
+                        v-if="user.created_at"
+                        class="text-line-wrapper additional-info-el"
+                        name="created"
+                     >
+                        <font-awesome-icon
+                           class="user-card-icon"
+                           icon="user-clock"
+                        />
+                        <p>
+                           <span class="bold">Joined:</span>
+                           {{ $luxon(user.created_at) }}
+                        </p>
+                     </div>
 
-                  <!-- CREATED AT -->
-                  <div
-                     v-if="user.created_at"
-                     class="text-line-wrapper"
-                     name="created"
-                  >
-                     <font-awesome-icon
-                        class="user-card-icon"
-                        icon="user-clock"
-                     />
-                     <p>
-                        <span class="bold">Joined:</span>
-                        {{ $luxon(user.created_at) }}
-                     </p>
-                  </div>
-
-                  <!-- EMAIL -->
-                  <div v-if="user.email" class="text-line-wrapper" name="email">
-                     <font-awesome-icon class="user-card-icon" icon="at" />
-                     <p>
-                        {{ user.email }}
-                     </p>
+                     <!-- EMAIL -->
+                     <div
+                        v-if="user.email"
+                        class="text-line-wrapper additional-info-el"
+                        name="email"
+                     >
+                        <font-awesome-icon class="user-card-icon" icon="at" />
+                        <p>
+                           {{ user.email }}
+                        </p>
+                     </div>
                   </div>
                </div>
             </div>
-            <button @click="test">test</button>
          </TheContainer>
       </section>
 
@@ -177,13 +201,14 @@
 </template>
 
 <script>
-import { Component, Vue, Watch } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 import TheContainer from "@/components/core/TheContainer.vue";
 import TheTitle from "@/components/core/TheTitle.vue";
 import TheModal from "@/components/core/TheModal.vue";
 import TheRepo from "@/components/core/TheRepo.vue";
 import UserService from "@/services/UserService.js";
-import { gsap, CSSPlugin } from "gsap/all";
+import gsap from "gsap";
+import CSSPlugin from "gsap/CSSPlugin";
 
 @Component({
    components: {
@@ -197,10 +222,6 @@ export default class UserPage extends Vue {
    userAvatarUrl = "";
    userName = "";
    user = [];
-
-   test() {
-      console.log(this.$refs.avatar);
-   }
 
    // ERROR MODAL
    get showErrorModal() {
@@ -275,31 +296,36 @@ export default class UserPage extends Vue {
    }
 
    // ANIMATIONS
-   // @Watch("isLoading")
-   animateUserPage() {
-      // IMG
-      // TEXT stagger
-      // name/login
-      //details
 
+   animateUserPage() {
       const img = this.$refs.avatar;
-      const gitInfo = this.$refs.gitInfo;
       const userName = this.$refs.userName;
+      const userLoginAsName = this.$refs.userLoginAsName;
       const userLogin = this.$refs.userLogin;
+      const gitInfoElements = document.querySelectorAll(".git-info-el");
+      const additionalInfoElements = document.querySelectorAll(
+         ".additional-info-el"
+      );
 
       gsap.registerPlugin(CSSPlugin);
       const userPageTimeline = gsap.timeline();
       userPageTimeline
          .fromTo(img, { x: -150 }, { x: 0, duration: 0.4 })
          .fromTo(
-            ".git-info-el",
+            gitInfoElements,
             { autoAlpha: 0 },
             { autoAlpha: 1, stagger: 0.1 }
          )
          .fromTo(
-            userName ? userName : userLogin,
-            { autoAlpha: 0, scale: 0.8 },
-            { autoAlpha: 1, scale: 1 }
+            userName ? userName : userLoginAsName,
+            { autoAlpha: 0, scale: 0.4 },
+            { autoAlpha: 1, duration: 0.3, scale: 1 }
+         )
+         .fromTo(userLogin, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3 })
+         .fromTo(
+            additionalInfoElements,
+            { autoAlpha: 0, x: -150 },
+            { autoAlpha: 1, x: 0, stagger: 0.15 }
          );
    }
 
@@ -324,6 +350,7 @@ export default class UserPage extends Vue {
    .owner-card {
       display: flex;
       flex-direction: column;
+      overflow: hidden;
 
       .card-header {
          display: flex;

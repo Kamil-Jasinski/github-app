@@ -1,5 +1,8 @@
 <template>
    <div class="wrapper">
+      <button v-if="testOn" @click="test" style="background-color: grey">
+         Animation test
+      </button>
       <!-- SEARCH -->
       <TheContainer
          :width="'max-content'"
@@ -8,7 +11,7 @@
          :bgColor="'transparent'"
          :borderColor="'transparent'"
          :boxShadow="'none'"
-         v-if="!isLoading"
+         class="searchBar"
       >
          <SearchBar
             :placeholder="this.userLogin"
@@ -18,16 +21,20 @@
       </TheContainer>
       <TheNav />
 
-      <div v-if="!isLoading" class="userRepos">
+      <div class="userRepos">
          <!-- USER CARD -->
-         <section class="repos-owner">
+         <section class="repos-owner" ref="reposOwner">
             <TheContainer
                width="95%"
                :bgColor="'#2C445C'"
                :bg="'linear-gradient(20deg, #2C445C 60%, #8396A8 100%)'"
             >
                <div class="owner-card">
-                  <div class="avatar">
+                  <div
+                     class="avatar"
+                     @mouseover="animateAvatar(true)"
+                     @mouseleave="animateAvatar(false)"
+                  >
                      <img
                         @click="goToUserPage"
                         v-if="userData.avatar_url"
@@ -132,6 +139,7 @@
                :key="repo.id"
                :userLogin="userLogin"
                :repoName="repo.name"
+               class="repoContainer"
             >
                <template>
                   <template slot="header">{{ repo.name }}</template>
@@ -163,7 +171,13 @@
          </section>
       </div>
 
-      <TheModal v-if="showErrorModal" @close="closeErrorModal">
+      <TheModal
+         v-if="showErrorModal"
+         @close="
+            closeErrorModal();
+            handleError();
+         "
+      >
          <h3 slot="header">Error</h3>
          <p slot="body">{{ errorMessage }}</p>
          <p slot="footer">
@@ -174,7 +188,7 @@
                   handleError();
                "
             >
-               Close
+               Go Home
             </button>
          </p>
       </TheModal>
@@ -189,6 +203,8 @@ import SearchBar from "@/components/SearchBar.vue";
 import TheModal from "@/components/core/TheModal.vue";
 import TheRepo from "@/components/core/TheRepo.vue";
 import UserService from "@/services/UserService";
+import gsap from "gsap";
+import CSSPlugin from "gsap/CSSPlugin";
 // import ErrorService from "@/services/ErrorService"; TODO
 
 @Component({
@@ -204,6 +220,21 @@ export default class UserRepos extends Vue {
    goToPage = 1;
    repos = [];
    userData = [];
+   reposLoaded = false;
+   userDataLoaded = false;
+   pagerAnim = false;
+
+   // TESTS
+   testOn = false;
+   test() {
+      this.reposLoaded = true;
+      this.userDataLoaded = true;
+      this.animateUserReposPage();
+   }
+   log(what) {
+      console.log(what);
+   }
+
    get userLogin() {
       return this.$route.params.user;
    }
@@ -252,6 +283,9 @@ export default class UserRepos extends Vue {
          this.$store.commit("SET_CURRENT_PAGE", {
             currentPage: this.goToPage,
          });
+
+         //Allow animation
+         this.pagerAnim = true;
       } catch (err) {
          console.warn(err.message);
       }
@@ -316,6 +350,8 @@ export default class UserRepos extends Vue {
 
          //Loading Off
          this.setLoader(false);
+
+         this.reposLoaded = true;
       } catch (err) {
          this.setLoader(false);
          console.warn(err.message);
@@ -347,6 +383,7 @@ export default class UserRepos extends Vue {
             userMaxReposPages: userMaxReposPages,
          });
          this.setLoader(false);
+         this.userDataLoaded = true;
       } catch (err) {
          console.warn(err.message);
          this.$store.commit("SET_ERROR_MESSAGE", {
@@ -373,8 +410,95 @@ export default class UserRepos extends Vue {
       }
    }
 
+   //ANIMATIONS
+   animateUserReposPage() {
+      gsap.registerPlugin(CSSPlugin);
+      const repoContainers = document.querySelectorAll(".repoContainer");
+      const searchBar = document.getElementsByClassName("searchBar");
+      const reposOwner = this.$refs.reposOwner;
+
+      const userReposTimeline = gsap.timeline();
+
+      if (this.reposLoaded && this.userDataLoaded) {
+         userReposTimeline
+            .fromTo(
+               [searchBar, ".main-nav"],
+               { autoAlpha: 0, y: 100, scale: 0.6 },
+               { autoAlpha: 1, duration: 0.8, delay: 0.3, y: 0, scale: 1 }
+            )
+            .fromTo(
+               reposOwner,
+               { autoAlpha: 0, y: "-50px", scale: -0.9 },
+               {
+                  autoAlpha: 1,
+                  duration: 0.8,
+                  y: 0,
+                  scale: 1,
+                  ease: "back.out(0.5)",
+               },
+               "-=.2"
+            )
+            .fromTo(
+               [".pager", ".core-title-container"],
+               { xPercent: "-120", autoAlpha: 0 },
+               { xPercent: 0, autoAlpha: 1, duration: 0.6 },
+               "-=.2"
+            )
+            .fromTo(
+               repoContainers,
+               { xPercent: "-120", autoAlpha: 0 },
+               { xPercent: 0, autoAlpha: 1, stagger: 0.2, duration: 0.6 }
+            )
+            .fromTo(
+               ".avatar",
+               { scale: 0.95 },
+               { scale: 1, duration: 1.5, ease: "elastic.out(5.5, 0.7)" }
+            );
+
+         this.userDataLoaded = false;
+         this.reposLoaded = false;
+      }
+   }
+   animateOnlyRepos() {
+      gsap.registerPlugin(CSSPlugin);
+      const repoContainers = document.querySelectorAll(".repoContainer");
+
+      const userReposTimeline = gsap.timeline();
+
+      if (this.pagerAnim) {
+         userReposTimeline.fromTo(
+            repoContainers,
+            { xPercent: "-120", autoAlpha: 0 },
+            { xPercent: 0, autoAlpha: 1, stagger: 0.2, duration: 0.6 }
+         );
+
+         // Lock animation
+         this.pagerAnim = false;
+      }
+   }
+   animateAvatar(animate) {
+      const avatarTimeline = gsap.timeline();
+
+      if (animate) {
+         avatarTimeline.to(".avatar", {
+            scale: 1.1,
+            ease: "ease-in-out",
+         });
+      } else if (!animate) {
+         avatarTimeline.to(".avatar", {
+            scale: 1,
+            ease: "ease-in-out",
+         });
+      }
+   }
+
    created() {
       this.loadData();
+   }
+
+   updated() {
+      this.animateUserReposPage();
+      this.animateOnlyRepos();
    }
 
    beforeDestroy() {
@@ -401,14 +525,20 @@ export default class UserRepos extends Vue {
    margin: auto auto;
 }
 
+// For GSAP
+.repos-owner,
+.searchBar,
+.repoContainer,
+.pager,
+.core-title-container,
+.main-nav {
+   visibility: hidden;
+}
+
 .repos-owner {
    display: flex;
    justify-content: center;
    width: 45%;
-
-   position: -webkit-sticky;
-   position: sticky;
-   top: 0;
 
    .owner-card {
       display: flex;
@@ -425,9 +555,7 @@ export default class UserRepos extends Vue {
          background-color: $main-app-color-dark;
          cursor: pointer;
          box-shadow: 2px 2px 10px 1px #000;
-         &:hover {
-            transform: scale(1.05);
-         }
+
          img {
             min-width: 100%;
             max-width: 100%;
@@ -453,6 +581,10 @@ export default class UserRepos extends Vue {
          }
       }
    }
+}
+
+.main-nav {
+   margin: 40px 0;
 }
 
 .user-repos-list {
