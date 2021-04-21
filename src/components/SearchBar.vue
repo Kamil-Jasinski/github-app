@@ -2,9 +2,14 @@
    <div class="search-bar">
       <form>
          <span>
-            <!-- User Name  -->
-            <input type="text" :placeholder="placeholder" v-model="userName" />
-            <!-- <span>{{ selectedSorting }}</span> -->
+            <!-- User Name Input  -->
+            <input
+               type="text"
+               @focus="showNotify = false"
+               :placeholder="placeholder"
+               v-model="userName"
+               :style="showNotify ? 'border: 3px solid red;' : null"
+            />
             <button
                @click.prevent="
                   goToUserReposPage();
@@ -89,7 +94,7 @@ export default class SearchBar extends Vue {
       }
       if (this.userName === "" && this.isHomepage) {
          this.showNotify = true;
-         this.notify = "Input can't be empty";
+         this.notify = "Hold your horses, you have a input field to fill.";
       }
    }
 
@@ -186,6 +191,9 @@ export default class SearchBar extends Vue {
 .search-notify {
    padding: 10px;
    color: red;
+   background-color: $main-app-color-light;
+   margin: 25px 0;
+   letter-spacing: 2px;
    text-transform: uppercase;
 }
 
