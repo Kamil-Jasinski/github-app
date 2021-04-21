@@ -1,7 +1,9 @@
 <template>
-   <div class="loader-wrapper">
-      <div class="loader"></div>
-   </div>
+   <Portal to="app-loader">
+      <div class="loader-wrapper">
+         <div class="loader"></div>
+      </div>
+   </Portal>
 </template>
 
 <style lang="scss" scoped>

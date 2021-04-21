@@ -1,35 +1,51 @@
 <template>
-   <transition name="modal">
-      <section id="modal">
-         <div class="modal-mask" @click="$emit('close')"></div>
+   <Portal to="app-modal">
+      <transition name="modal">
+         <section id="modal">
+            <div class="modal-mask" @click="$emit('close')"></div>
 
-         <div class="modal-container">
-            <div class="modal-header">
-               <h3>
-                  <slot name="header">
-                     <!-- default header -->
+            <div class="modal-container">
+               <div class="modal-header">
+                  <h3>
+                     <slot name="header">
+                        <!-- default header -->
+                     </slot>
+                  </h3>
+               </div>
+
+               <div class="modal-body">
+                  <slot name="body">
+                     <!-- default body  -->
                   </slot>
-               </h3>
-            </div>
+               </div>
 
-            <div class="modal-body">
-               <slot name="body">
-                  <!-- default body  -->
-               </slot>
+               <div class="modal-footer">
+                  <slot name="footer">
+                     <!-- default footer -->
+                     <button
+                        class="modal-default-button"
+                        @click="$emit('close')"
+                     >
+                        OK
+                     </button>
+                  </slot>
+               </div>
             </div>
-
-            <div class="modal-footer">
-               <slot name="footer">
-                  <!-- default footer -->
-                  <button class="modal-default-button" @click="$emit('close')">
-                     OK
-                  </button>
-               </slot>
-            </div>
-         </div>
-      </section>
-   </transition>
+         </section>
+      </transition>
+   </Portal>
 </template>
+
+<script lang="ts">
+import { Vue, Component } from "vue-property-decorator";
+
+@Component
+export default class TheModal extends Vue {
+   beforeDestroy() {
+      this.$emit("modal-off");
+   }
+}
+</script>
 
 <style lang="scss">
 #modal {
@@ -53,6 +69,7 @@
    bottom: 0;
    right: 0;
    background-color: rgba(0, 0, 0, 0.2);
+   cursor: alias;
 }
 
 .modal-container {
@@ -104,9 +121,16 @@
    justify-content: flex-end;
    .modal-default-button {
       padding: 5px 10px;
+      background-color: $third-app-color-dark;
+      border: none;
       color: $main-app-color-dark;
+      letter-spacing: 1px;
       font-weight: bold;
       cursor: pointer;
+      transition: background-color 0.1s ease-in;
+      &:hover {
+         background-color: $third-app-color-light;
+      }
    }
 }
 

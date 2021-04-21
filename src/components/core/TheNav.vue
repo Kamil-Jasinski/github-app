@@ -22,7 +22,6 @@ export default class TheNav extends Vue {
          name: this.routeName,
          params: { user: this.paramUserLogin },
       });
-      console.log("redirect");
    }
 
    get isLoading() {
