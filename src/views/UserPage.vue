@@ -6,6 +6,7 @@
          :user="userLogin"
          :navText="'repositories'"
          :paramUserLogin="userLogin"
+         :menuType="'big'"
       />
 
       <!-- USER CARD -->
@@ -202,9 +203,7 @@
 
 <script>
 import { Component, Vue } from "vue-property-decorator";
-import TheContainer from "@/components/core/TheContainer.vue";
 import TheTitle from "@/components/core/TheTitle.vue";
-import TheModal from "@/components/core/TheModal.vue";
 import TheRepo from "@/components/core/TheRepo.vue";
 import UserService from "@/services/UserService.js";
 import gsap from "gsap";
@@ -212,9 +211,7 @@ import CSSPlugin from "gsap/CSSPlugin";
 
 @Component({
    components: {
-      TheContainer,
       TheTitle,
-      TheModal,
       TheRepo,
    },
 })
@@ -311,6 +308,12 @@ export default class UserPage extends Vue {
       const userPageTimeline = gsap.timeline();
       userPageTimeline
          .fromTo(img, { x: -150 }, { x: 0, duration: 0.4 })
+         .fromTo(
+            ".main-nav",
+            { y: -100, autoAlpha: 0 },
+            { y: 0, autoAlpha: 1, duration: 0.4 },
+            "<"
+         )
          .fromTo(
             gitInfoElements,
             { autoAlpha: 0 },

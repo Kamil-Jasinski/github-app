@@ -30,6 +30,17 @@ body {
    -webkit-font-smoothing: antialiased;
    -moz-osx-font-smoothing: grayscale;
    color: #fff;
+
+   &::-webkit-scrollbar {
+      width: 10px;
+      height: 5px;
+   }
+   &::-webkit-scrollbar-track {
+      background-color: #ffffff25;
+   }
+   &::-webkit-scrollbar-thumb {
+      background-color: $third-app-color-dark;
+   }
 }
 
 body {

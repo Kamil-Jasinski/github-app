@@ -3,6 +3,7 @@
       <button v-if="testOn" @click="test" style="background-color: grey">
          Animation test
       </button>
+      <TheNav />
       <!-- SEARCH -->
       <TheContainer
          :width="'max-content'"
@@ -19,7 +20,6 @@
             @clicked="loadData"
          />
       </TheContainer>
-      <TheNav />
 
       <div class="userRepos">
          <!-- USER CARD -->
@@ -154,7 +154,7 @@
                      {{ repo.forks }}</template
                   >
                   <template slot="githubUrl">
-                     <span class="bold">Github Url:</span> {{ repo.url }}
+                     <span class="bold">Github Url:</span> {{ repo.svn_url }}
                   </template>
 
                   <template slot="cloneUrl">
@@ -197,22 +197,17 @@
 
 <script>
 import { Component, Vue, Watch } from "vue-property-decorator";
-import TheContainer from "@/components/core/TheContainer.vue";
 import TheTitle from "@/components/core/TheTitle.vue";
 import SearchBar from "@/components/SearchBar.vue";
-import TheModal from "@/components/core/TheModal.vue";
 import TheRepo from "@/components/core/TheRepo.vue";
 import UserService from "@/services/UserService";
 import gsap from "gsap";
 import CSSPlugin from "gsap/CSSPlugin";
-// import ErrorService from "@/services/ErrorService"; TODO
 
 @Component({
    components: {
-      TheContainer,
       TheTitle,
       SearchBar,
-      TheModal,
       TheRepo,
    },
 })
@@ -223,20 +218,11 @@ export default class UserRepos extends Vue {
    reposLoaded = false;
    userDataLoaded = false;
    pagerAnim = false;
-
-   // TESTS
-   testOn = false;
-   test() {
-      this.reposLoaded = true;
-      this.userDataLoaded = true;
-      this.animateUserReposPage();
-   }
-   log(what) {
-      console.log(what);
-   }
-
    get userLogin() {
       return this.$route.params.user;
+   }
+   get isLoading() {
+      return this.$store.getters.isLoading;
    }
 
    goToUserPage() {
@@ -254,10 +240,6 @@ export default class UserRepos extends Vue {
          login: "",
       });
       this.$router.push({ name: "Home" });
-   }
-
-   get isLoading() {
-      return this.$store.getters.isLoading;
    }
 
    // PAGER & FILTER
@@ -428,7 +410,7 @@ export default class UserRepos extends Vue {
             )
             .fromTo(
                reposOwner,
-               { autoAlpha: 0, y: "-50px", scale: -0.9 },
+               { autoAlpha: 0, y: "-50px", scale: 1 },
                {
                   autoAlpha: 1,
                   duration: 0.8,
@@ -492,6 +474,7 @@ export default class UserRepos extends Vue {
       }
    }
 
+   // Life Cycle
    created() {
       this.loadData();
    }
@@ -581,10 +564,6 @@ export default class UserRepos extends Vue {
          }
       }
    }
-}
-
-.main-nav {
-   margin: 40px 0;
 }
 
 .user-repos-list {
