@@ -1,10 +1,26 @@
 <template>
-   <nav v-if="!isLoading" class="main-nav">
-      <button class="nav-button" type="button" @click="redirect">
-         <font-awesome-icon class="nav-icon" icon="arrow-left" />
-         <span class="__nav-icon-text">{{ user }} {{ navText }}</span>
-      </button>
-   </nav>
+   <div>
+      <nav v-if="!isLoading && menuType !== 'big'" class="main-nav">
+         <button class="nav-button" type="button" @click="redirect">
+            <font-awesome-icon class="nav-icon" icon="arrow-left" />
+            <span class="__nav-icon-text">{{ user }} {{ navText }}</span>
+         </button>
+      </nav>
+      <nav v-if="!isLoading && menuType === 'big'" class="main-nav">
+         <button class="nav-button" type="button" @click="redirect">
+            <font-awesome-icon class="nav-icon" icon="arrow-left" />
+            <span class="__nav-icon-text">{{ user }} {{ navText }}</span>
+         </button>
+         <button
+            class="nav-button"
+            type="button"
+            @click="$router.push({ name: 'Home' })"
+         >
+            <font-awesome-icon class="nav-icon" icon="home" />
+            <span class="__nav-icon-text">Home</span>
+         </button>
+      </nav>
+   </div>
 </template>
 
 <script>
@@ -16,6 +32,7 @@ export default class TheNav extends Vue {
    @Prop({ default: null }) paramUserLogin;
    @Prop({ default: null }) user;
    @Prop({ default: "Home" }) navText;
+   @Prop({ default: null }) menuType;
 
    redirect() {
       this.$router.push({
@@ -35,6 +52,8 @@ export default class TheNav extends Vue {
    display: flex;
    justify-content: center;
    align-items: center;
+   padding: 20px 0;
+   visibility: hidden;
 
    .nav-button {
       display: flex;
