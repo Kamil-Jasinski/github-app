@@ -8,10 +8,17 @@
 
 <style lang="scss" scoped>
 .loader-wrapper {
-   margin: auto auto;
    display: flex;
    justify-content: center;
    align-items: center;
+   min-width: 100%;
+   min-height: 100%;
+   position: fixed;
+   top: 50%;
+   left: 50%;
+   background-color: rgba(0, 0, 0, 0.2);
+   transform: translate(-50%, -50%);
+   z-index: 10000;
 
    .loader {
       width: 120px;
