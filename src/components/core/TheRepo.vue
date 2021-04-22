@@ -30,6 +30,7 @@
             <li class="__detail"><slot name="cloneUrl">-</slot></li>
             <li class="__detail"><slot name="createdAt">-</slot></li>
          </ul>
+         <p v-if="showNotify" class="notify">{{ notify }}</p>
       </div>
 
       <slot name="footer">
@@ -46,14 +47,13 @@
 
       <!-- COMMITS -->
       <TheModal
-         v-if="openCommitsModal"
+         v-if="openCommitsModal && commits.length > 0"
          @close="openCommitsModal = false"
-         @modal-off="modalOff"
       >
          <template #header>Commits for: {{ repoName }}</template>
 
          <template #body>
-            <ul v-if="commits">
+            <ul>
                <li v-for="item in commits" :key="item.node_id">
                   <div class="commit-body">
                      <div>
@@ -68,7 +68,6 @@
                   </div>
                </li>
             </ul>
-            <TheLoader v-if="!commits" />
          </template>
 
          <template #footer>
@@ -83,17 +82,17 @@
             </button>
          </template>
       </TheModal>
+      <TheLoader v-if="openCommitsModal && commits.length === 0" />
 
       <!-- CONTRIBUTORS -->
       <TheModal
-         v-if="openContributorsModal"
+         v-if="openContributorsModal && contributors && contributors.length > 0"
          @close="openContributorsModal = false"
-         @modal-off="modalOff"
       >
          <template #header>Contributors for: {{ repoName }}</template>
 
          <template #body>
-            <ul v-if="contributors">
+            <ul>
                <li v-for="item in contributors" :key="item.id">
                   <UserCard
                      :userLogin="item.login"
@@ -101,7 +100,6 @@
                   />
                </li>
             </ul>
-            <TheLoader v-if="!contributors" />
          </template>
 
          <template #footer>
@@ -113,6 +111,11 @@
             </button>
          </template>
       </TheModal>
+      <TheLoader
+         v-if="
+            openContributorsModal && contributors && contributors.length === 0
+         "
+      />
    </div>
 </template>
 
@@ -143,8 +146,10 @@ export default class TheRepo extends Vue {
 
    openCommitsModal = false;
    openContributorsModal = false;
+   showNotify = false;
    commits = [];
    contributors = [];
+   notify = "";
 
    @Watch("openCommitsModal")
    async getCommits() {
@@ -162,6 +167,16 @@ export default class TheRepo extends Vue {
          this.$store.commit("SET_SHOW_ERROR_MODAL", {
             showErrorModal: true,
          });
+      } finally {
+         if (this.commits && this.commits.length === 0) {
+            this.openCommitsModal = false;
+            this.showNotify = true;
+            this.notify = "This repository has no commits to show.";
+            setTimeout(() => {
+               this.showNotify = false;
+               this.notify = "";
+            }, 2500);
+         }
       }
    }
 
@@ -181,12 +196,17 @@ export default class TheRepo extends Vue {
          this.$store.commit("SET_SHOW_ERROR_MODAL", {
             showErrorModal: true,
          });
+      } finally {
+         if (this.contributors && this.contributors.length === 0) {
+            this.openContributorsModal = false;
+            this.showNotify = true;
+            this.notify = "This repository has no contributors to show.";
+            setTimeout(() => {
+               this.showNotify = false;
+               this.notify = "";
+            }, 2500);
+         }
       }
-   }
-
-   modalOff() {
-      this.commits = [];
-      this.contributors = [];
    }
 }
 </script>
@@ -206,10 +226,22 @@ export default class TheRepo extends Vue {
    color: $third-app-color-dark;
    text-transform: capitalize;
 }
-.__detail {
-   border-left: 3px solid $third-app-color-dark;
-   margin: 5px 0;
-   padding-left: 10px;
+.details {
+   .__detail {
+      border-left: 3px solid $third-app-color-dark;
+      margin: 5px 0;
+      padding-left: 10px;
+   }
+
+   .notify {
+      padding: 10px;
+      color: red;
+      background-color: $main-app-color-dark;
+      margin: 25px 0;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-align: center;
+   }
 }
 
 .footer {
