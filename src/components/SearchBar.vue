@@ -63,25 +63,25 @@
    </div>
 </template>
 
-<script>
+<script lang="ts">
 import { Component, Vue, Prop, Watch } from "vue-property-decorator";
 
 @Component({
    components: {},
 })
 export default class SearchBar extends Vue {
-   @Prop({ default: true }) isHomepage;
-   @Prop({ default: "User name..." }) placeholder;
+   @Prop({ default: true }) isHomepage:boolean;
+   @Prop({ default: "User name..." }) placeholder:string;
    userName = ""; // from input to route @param
 
    perPage = this.$store.getters.currentPerPage;
-   sorting = this.$store.getters.searchSorting;
-   order = this.$store.getters.searchOrder;
+   sorting:string = this.$store.getters.searchSorting;
+   order:string = this.$store.getters.searchOrder;
 
    showNotify = false;
-   notify = "";
+   notify:string;
 
-   async goToUserReposPage() {
+   async goToUserReposPage():Promise<any> {
       const currentUserLogin = this.$store.getters.userLogin;
       this.showNotify = false;
 
@@ -99,20 +99,20 @@ export default class SearchBar extends Vue {
    }
 
    @Watch("perPage")
-   updatePerPageValue() {
+   updatePerPageValue():void {
       this.$store.commit("SET_CURRENT_PER_PAGE", {
          currentPerPage: parseInt(this.perPage),
       });
    }
 
    @Watch("order")
-   updateOrderValue() {
+   updateOrderValue():void {
       this.$store.commit("SET_SEARCH_ORDER", {
          order: this.order,
       });
    }
    @Watch("sorting")
-   updateSortingValue() {
+   updateSortingValue():void {
       this.$store.commit("SET_SEARCH_SORTING", {
          sorting: this.sorting,
       });

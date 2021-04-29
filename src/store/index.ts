@@ -47,31 +47,31 @@ export default new Vuex.Store({
   actions: {},
   modules: {},
   getters: {
-    userLogin: (state) => {
+    userLogin: (state):string => {
       return state.userLogin;
     },
-    searchSorting: (state) => {
+    searchSorting: (state):string => {
       return state.searchSorting;
     },
-    searchOrder: (state) => {
+    searchOrder: (state):string => {
       return state.searchOrder;
     },
-    currentPage: (state) => {
+    currentPage: (state):number => {
       return state.currentPage;
     },
-    currentPerPage: (state) => {
+    currentPerPage: (state):number => {
       return state.currentPerPage;
     },
-    userMaxReposPages: (state) => {
+    userMaxReposPages: (state):number => {
       return state.userMaxReposPages;
     },
-    errorMessage: (state) => {
+    errorMessage: (state):string => {
       return state.errorMessage;
     },
-    showErrorModal: (state) => {
+    showErrorModal: (state):boolean => {
       return state.showErrorModal;
     },
-    isLoading: (state) => {
+    isLoading: (state):boolean => {
       return state.isLoading;
     },
   },

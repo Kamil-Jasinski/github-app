@@ -1,7 +1,7 @@
 import Vue from "vue";
 
 export default new (class RepositoryService {
-  async getCommits(userLogin, repoName, openCommitsModal) {
+  async getCommits(userLogin:string, repoName:string, openCommitsModal:boolean) {
     if (openCommitsModal) {
       const commits = await Vue.axios.get(
         `https://api.github.com/repos/${userLogin}/${repoName}/commits`
@@ -10,7 +10,7 @@ export default new (class RepositoryService {
     }
   }
 
-  async getContributors(userLogin, repoName, openContributorsModal) {
+  async getContributors(userLogin:string, repoName:string, openContributorsModal:boolean) {
     if (openContributorsModal) {
       const contributors = await Vue.axios.get(
         `https://api.github.com/repos/${userLogin}/${repoName}/contributors`

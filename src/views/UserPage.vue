@@ -201,11 +201,11 @@
    </div>
 </template>
 
-<script>
+<script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import TheTitle from "@/components/core/TheTitle.vue";
 import TheRepo from "@/components/core/TheRepo.vue";
-import UserService from "@/services/UserService.js";
+import UserService from "@/services/UserService";
 import gsap from "gsap";
 import CSSPlugin from "gsap/CSSPlugin";
 
@@ -216,23 +216,23 @@ import CSSPlugin from "gsap/CSSPlugin";
    },
 })
 export default class UserPage extends Vue {
-   userAvatarUrl = "";
-   userName = "";
-   user = [];
+   userAvatarUrl!: string ;
+   userName!: string;
+   user: any;
 
    // ERROR MODAL
-   get showErrorModal() {
+   get showErrorModal():boolean {
       return this.$store.getters.showErrorModal;
    }
-   closeErrorModal() {
+   closeErrorModal():void {
       this.$store.commit("SET_SHOW_ERROR_MODAL", {
          showErrorModal: false,
       });
    }
-   get errorMessage() {
+   get errorMessage():string {
       return this.$store.getters.errorMessage;
    }
-   handleError() {
+   handleError():void {
       this.$store.commit("SET_IS_LOADING", {
          showErrorModal: false,
       });
@@ -245,20 +245,20 @@ export default class UserPage extends Vue {
       this.$router.push({ name: "Home" });
    }
 
-   get isLoading() {
+   get isLoading():boolean {
       return this.$store.getters.isLoading;
    }
 
-   get userLogin() {
+   get userLogin():string {
       return this.$route.params.user;
    }
 
-   async getUser() {
+   async getUser():Promise<void> {
       this.setLoader(true);
       try {
          let user;
          user = await UserService.getUser(this.userLogin);
-         this.user = user.data;
+         this.user = user!.data;
          this.userName = this.user.name;
          this.userAvatarUrl = this.user.avatar_url;
          this.setLoader(false);
@@ -274,7 +274,7 @@ export default class UserPage extends Vue {
       }
    }
 
-   setLoader(mode) {
+   setLoader(mode: boolean) {
       if (mode) {
          //Loading Off
          this.$store.commit("SET_IS_LOADING", {
@@ -288,13 +288,13 @@ export default class UserPage extends Vue {
       }
    }
 
-   beforeMount() {
+   beforeMount():void {
       this.getUser();
    }
 
    // ANIMATIONS
 
-   animateUserPage() {
+   animateUserPage():void {
       const img = this.$refs.avatar;
       const userName = this.$refs.userName;
       const userLoginAsName = this.$refs.userLoginAsName;
@@ -332,7 +332,7 @@ export default class UserPage extends Vue {
          );
    }
 
-   updated() {
+   updated():void {
       this.animateUserPage();
    }
 }

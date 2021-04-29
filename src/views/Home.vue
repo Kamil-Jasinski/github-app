@@ -32,7 +32,7 @@ import CSSPlugin from "gsap/CSSPlugin";
    },
 })
 export default class Home extends Vue {
-   animateHomePage() {
+   animateHomePage():void {
       gsap.registerPlugin(CSSPlugin);
       const homeTimeline = gsap.timeline();
       const homeSubtitleElements = document.querySelectorAll(".el");
@@ -56,7 +56,7 @@ export default class Home extends Vue {
          );
    }
 
-   mounted() {
+   mounted():void {
       this.animateHomePage();
    }
 }

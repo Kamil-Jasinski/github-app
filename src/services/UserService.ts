@@ -1,7 +1,7 @@
 import Vue from "vue";
 
 export default new (class UserService {
-  async getUser(userLogin) {
+  async getUser(userLogin:string) {
     let user;
 
     if (userLogin) {
@@ -11,7 +11,7 @@ export default new (class UserService {
     return user;
   }
 
-  async getUserRepos(userLogin, sorting, order, perPage, goToPage) {
+  async getUserRepos(userLogin:string, sorting:string, order:string, perPage:number, goToPage:number) {
     let repos;
 
     if (userLogin) {

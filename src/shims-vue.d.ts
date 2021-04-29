@@ -3,6 +3,6 @@ declare module "*.vue" {
   export default Vue;
 }
 
-// declare module "vue-carousel";
+declare module "vue-luxon";
 // declare module "vue-select";
 // declare module "@glidejs/glide";

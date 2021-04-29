@@ -1,8 +1,6 @@
 <template>
    <div class="wrapper">
-      <button v-if="testOn" @click="test" style="background-color: grey">
-         Animation test
-      </button>
+      
       <TheNav />
       <!-- SEARCH -->
       <TheContainer
@@ -195,7 +193,7 @@
    </div>
 </template>
 
-<script>
+<script lang="ts">
 import { Component, Vue, Watch } from "vue-property-decorator";
 import TheTitle from "@/components/core/TheTitle.vue";
 import SearchBar from "@/components/SearchBar.vue";
@@ -213,23 +211,23 @@ import CSSPlugin from "gsap/CSSPlugin";
 })
 export default class UserRepos extends Vue {
    goToPage = 1;
-   repos = [];
-   userData = [];
+   repos:[] = [];
+   userData:[] = [];
    reposLoaded = false;
    userDataLoaded = false;
    pagerAnim = false;
-   get userLogin() {
+   get userLogin():string {
       return this.$route.params.user;
    }
-   get isLoading() {
+   get isLoading():boolean {
       return this.$store.getters.isLoading;
    }
 
-   goToUserPage() {
+   goToUserPage():void {
       this.$router.push({ name: "UserPage", params: { user: this.userLogin } });
    }
 
-   handleError() {
+   handleError():void {
       this.$store.commit("SET_IS_LOADING", {
          showErrorModal: false,
       });
@@ -243,16 +241,16 @@ export default class UserRepos extends Vue {
    }
 
    // PAGER & FILTER
-   get order() {
+   get order():string {
       return this.$store.getters.searchOrder;
    }
-   get sorting() {
+   get sorting():string {
       return this.$store.getters.searchSorting;
    }
-   get perPage() {
+   get perPage():number {
       return this.$store.getters.currentPerPage;
    }
-   async pager() {
+   async pager():Promise<any> {
       try {
          const repos = await Vue.axios.get(
             `https://api.github.com/users/${this.userLogin}/repos?page=${this.goToPage}&per_page=${this.perPage}`
@@ -272,32 +270,32 @@ export default class UserRepos extends Vue {
          console.warn(err.message);
       }
    }
-   get currentPage() {
+   get currentPage():number {
       return this.$store.getters.currentPage;
    }
-   get userMaxReposPages() {
+   get userMaxReposPages():number {
       return this.$store.getters.userMaxReposPages;
    }
    // ERROR MODAL
-   get showErrorModal() {
+   get showErrorModal():boolean {
       return this.$store.getters.showErrorModal;
    }
-   closeErrorModal() {
+   closeErrorModal():void {
       this.$store.commit("SET_SHOW_ERROR_MODAL", {
          showErrorModal: false,
       });
    }
-   get errorMessage() {
+   get errorMessage():string {
       return this.$store.getters.errorMessage;
    }
 
    // CHANGE PAGE CONTENT ON USER CHANGE
    @Watch("userLogin")
-   resetPage() {
+   resetPage():void {
       this.goToPage = 1;
    }
    @Watch("userLogin")
-   async loadData() {
+   async loadData():Promise<any> {
       if (this.userLogin) {
          // GET REPOS
          this.getRepos();
@@ -316,7 +314,7 @@ export default class UserRepos extends Vue {
       });
    }
 
-   async getRepos() {
+   async getRepos():Promise<any> {
       this.setLoader(true);
       try {
          let repos;
@@ -346,16 +344,16 @@ export default class UserRepos extends Vue {
       }
    }
 
-   async getUser() {
+   async getUser():Promise<any> {
       let userResponse;
       let userMaxReposPages;
       this.setLoader(true);
       try {
          userResponse = await UserService.getUser(this.userLogin);
-         this.userData = userResponse.data;
+         this.userData = userResponse!.data;
 
          //Store user repos max page
-         const userReposNumber = userResponse.data.public_repos;
+         const userReposNumber = userResponse!.data.public_repos;
          if (this.perPage) {
             userMaxReposPages = Math.ceil(userReposNumber / this.perPage);
          } else {
@@ -378,7 +376,7 @@ export default class UserRepos extends Vue {
       }
    }
 
-   setLoader(mode) {
+   setLoader(mode:boolean):void {
       if (mode) {
          //Loading Off
          this.$store.commit("SET_IS_LOADING", {
@@ -393,7 +391,7 @@ export default class UserRepos extends Vue {
    }
 
    //ANIMATIONS
-   animateUserReposPage() {
+   animateUserReposPage():void {
       gsap.registerPlugin(CSSPlugin);
       const repoContainers = document.querySelectorAll(".repoContainer");
       const searchBar = document.getElementsByClassName("searchBar");
@@ -441,7 +439,7 @@ export default class UserRepos extends Vue {
          this.reposLoaded = false;
       }
    }
-   animateOnlyRepos() {
+   animateOnlyRepos():void {
       gsap.registerPlugin(CSSPlugin);
       const repoContainers = document.querySelectorAll(".repoContainer");
 
@@ -458,7 +456,7 @@ export default class UserRepos extends Vue {
          this.pagerAnim = false;
       }
    }
-   animateAvatar(animate) {
+   animateAvatar(animate:boolean):void {
       const avatarTimeline = gsap.timeline();
 
       if (animate) {
@@ -475,16 +473,16 @@ export default class UserRepos extends Vue {
    }
 
    // Life Cycle
-   created() {
+   created():void {
       this.loadData();
    }
 
-   updated() {
+   updated():void {
       this.animateUserReposPage();
       this.animateOnlyRepos();
    }
 
-   beforeDestroy() {
+   beforeDestroy():void {
       // Clean Repo []
       this.repos = [];
 

@@ -11,9 +11,6 @@ import { Vue, Component } from "vue-property-decorator";
 
 @Component
 export default class app extends Vue {
-   get isLoading() {
-      return this.$store.getters.isLoading;
-   }
 }
 </script>
 
