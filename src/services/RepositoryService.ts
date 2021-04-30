@@ -1,5 +1,11 @@
 import Vue from "vue";
 
+// interface commits {
+//   userLogin:string,
+//   repoName:string,
+//   openCommitsModal:boolean
+// }
+
 export default new (class RepositoryService {
   async getCommits(userLogin:string, repoName:string, openCommitsModal:boolean) {
     if (openCommitsModal) {

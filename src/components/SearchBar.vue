@@ -70,16 +70,18 @@ import { Component, Vue, Prop, Watch } from "vue-property-decorator";
    components: {},
 })
 export default class SearchBar extends Vue {
-   @Prop({ default: true }) isHomepage:boolean;
-   @Prop({ default: "User name..." }) placeholder:string;
-   userName = ""; // from input to route @param
+   @Prop({ default: true }) isHomepage!:boolean;
+   @Prop({ default: "User name..." }) placeholder!:string;
+
+   // userName!:string ;
+   userName = '' ; // from input to route @param
+   notify!:string;
 
    perPage = this.$store.getters.currentPerPage;
    sorting:string = this.$store.getters.searchSorting;
    order:string = this.$store.getters.searchOrder;
 
    showNotify = false;
-   notify:string;
 
    async goToUserReposPage():Promise<any> {
       const currentUserLogin = this.$store.getters.userLogin;

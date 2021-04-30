@@ -16,19 +16,19 @@
    </div>
 </template>
 
-<script>
+<script lang="ts">
 import { Component, Vue, Prop } from "vue-property-decorator";
 
 @Component
 export default class TheContainer extends Vue {
-   @Prop({ default: "auto" }) width;
-   @Prop({ default: "auto" }) minWidth;
-   @Prop({ default: "10px" }) margin;
-   @Prop({ default: null }) bgColor;
-   @Prop({ default: null }) borderColor;
-   @Prop({ default: "15px" }) borderRadius;
-   @Prop({ default: null }) boxShadow;
-   @Prop({ default: null }) bg;
+   @Prop({ default: "auto" }) width:string;
+   @Prop({ default: "auto" }) minWidth:string;
+   @Prop({ default: "10px" }) margin:string;
+   @Prop({ default: null }) bgColor:string;
+   @Prop({ default: null }) borderColor:string;
+   @Prop({ default: "15px" }) borderRadius:string;
+   @Prop({ default: null }) boxShadow:string;
+   @Prop({ default: null }) bg:string;
 }
 </script>
 <style lang="scss" >

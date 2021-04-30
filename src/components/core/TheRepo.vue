@@ -119,7 +119,7 @@
    </div>
 </template>
 
-<script>
+<script lang="ts">
 import { Component, Vue, Prop, Watch } from "vue-property-decorator";
 import TheModal from "@/components/core/TheModal.vue";
 import UserCard from "@/components/core/UserCard.vue";
@@ -132,27 +132,27 @@ import RepositoryService from "@/services/RepositoryService";
    },
 })
 export default class TheRepo extends Vue {
-   @Prop({ default: "auto" }) width;
-   @Prop({ default: "auto" }) minWidth;
-   @Prop({ default: "25px 10px" }) margin;
-   @Prop({ default: null }) bgColor;
-   @Prop({ default: null }) borderColor;
-   @Prop({ default: "15px" }) borderRadius;
-   @Prop({ default: null }) boxShadow;
-   @Prop({ default: null }) bg;
-   @Prop({ default: null }) userLogin;
-   @Prop({ default: null }) repoName;
-   @Prop({ default: "master" }) branch;
+   @Prop({ default: "auto" }) width!:string;
+   @Prop({ default: "auto" }) minWidth!:string;
+   @Prop({ default: "25px 10px" }) margin!:string;
+   @Prop({ default: null }) bgColor!:string | any;
+   @Prop({ default: null }) borderColor!:string | any;
+   @Prop({ default: "15px" }) borderRadius!:string;
+   @Prop({ default: null }) boxShadow!:string | any;
+   @Prop({ default: null }) bg!:string | any;
+   @Prop({ default: null }) userLogin!:string | any;
+   @Prop({ default: null }) repoName!:string | any;
+   @Prop({ default: "master" }) branch!:string;
 
    openCommitsModal = false;
    openContributorsModal = false;
    showNotify = false;
-   commits = [];
-   contributors = [];
-   notify = "";
+   commits:string[] = [];
+   contributors:[] = [];
+   notify!:string;
 
    @Watch("openCommitsModal")
-   async getCommits() {
+   async getCommits():Promise<any> {
       try {
          this.commits = await RepositoryService.getCommits(
             this.userLogin,
@@ -181,7 +181,7 @@ export default class TheRepo extends Vue {
    }
 
    @Watch("openContributorsModal")
-   async getContributors() {
+   async getContributors():Promise<any> {
       try {
          this.contributors = await RepositoryService.getContributors(
             this.userLogin,

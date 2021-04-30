@@ -350,10 +350,10 @@ export default class UserRepos extends Vue {
       this.setLoader(true);
       try {
          userResponse = await UserService.getUser(this.userLogin);
-         this.userData = userResponse!.data;
+         this.userData = userResponse.data;
 
          //Store user repos max page
-         const userReposNumber = userResponse!.data.public_repos;
+         const userReposNumber = userResponse.data.public_repos;
          if (this.perPage) {
             userMaxReposPages = Math.ceil(userReposNumber / this.perPage);
          } else {

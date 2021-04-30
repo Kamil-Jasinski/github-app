@@ -23,25 +23,25 @@
    </div>
 </template>
 
-<script>
+<script lang="ts">
 import { Component, Vue, Prop } from "vue-property-decorator";
 
 @Component
 export default class TheNav extends Vue {
-   @Prop({ default: "Home" }) routeName;
-   @Prop({ default: null }) paramUserLogin;
-   @Prop({ default: null }) user;
-   @Prop({ default: "Home" }) navText;
-   @Prop({ default: null }) menuType;
+   @Prop({ default: "Home" }) routeName:string;
+   @Prop({ default: null }) paramUserLogin:string;
+   @Prop({ default: null }) user:string;
+   @Prop({ default: "Home" }) navText:string;
+   @Prop({ default: null }) menuType:string;
 
-   redirect() {
+   redirect():void {
       this.$router.push({
          name: this.routeName,
          params: { user: this.paramUserLogin },
       });
    }
 
-   get isLoading() {
+   get isLoading():void {
       return this.$store.getters.isLoading;
    }
 }

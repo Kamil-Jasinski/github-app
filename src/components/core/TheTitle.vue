@@ -17,17 +17,17 @@
    </div>
 </template>
 
-<script>
+<script lang="ts">
 import { Component, Vue, Prop } from "vue-property-decorator";
 
 @Component
 export default class TheTitle extends Vue {
-   @Prop({ default: "auto" }) width;
-   @Prop({ default: "10px" }) margin;
-   @Prop({ default: null }) bgColor;
-   @Prop({ default: null }) borderColor;
-   @Prop({ default: null }) color;
-   @Prop({ default: '40px' }) padding;
+   @Prop({ default: "auto" }) width:string;
+   @Prop({ default: "10px" }) margin:string;
+   @Prop({ default: null }) bgColor:string;
+   @Prop({ default: null }) borderColor:string;
+   @Prop({ default: null }) color:string;
+   @Prop({ default: '40px' }) padding:string;
 }
 </script>
 <style lang="scss">

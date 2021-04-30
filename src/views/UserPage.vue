@@ -217,8 +217,8 @@ import CSSPlugin from "gsap/CSSPlugin";
 })
 export default class UserPage extends Vue {
    userAvatarUrl!: string ;
-   userName!: string;
-   user: any;
+   userName!:string;
+   user: any; 
 
    // ERROR MODAL
    get showErrorModal():boolean {
@@ -253,7 +253,7 @@ export default class UserPage extends Vue {
       return this.$route.params.user;
    }
 
-   async getUser():Promise<void> {
+   async getUser():Promise<any> {
       this.setLoader(true);
       try {
          let user;
@@ -274,7 +274,7 @@ export default class UserPage extends Vue {
       }
    }
 
-   setLoader(mode: boolean) {
+   setLoader(mode: boolean):void {
       if (mode) {
          //Loading Off
          this.$store.commit("SET_IS_LOADING", {
