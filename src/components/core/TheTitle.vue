@@ -22,12 +22,12 @@ import { Component, Vue, Prop } from "vue-property-decorator";
 
 @Component
 export default class TheTitle extends Vue {
-   @Prop({ default: "auto" }) width!:string;
-   @Prop({ default: "10px" }) margin!:string;
-   @Prop({ default: null }) bgColor?:string;
-   @Prop({ default: null }) borderColor?:string;
-   @Prop({ default: null }) color?:string;
-   @Prop({ default: '40px' }) padding!:string;
+   @Prop({ default: "auto" }) width?:string | null;
+   @Prop({ default: "10px" }) margin?:string | null;
+   @Prop({ default: null }) bgColor?:string | null;
+   @Prop({ default: null }) borderColor?:string | null;
+   @Prop({ default: null }) color?:string | null;
+   @Prop({ default: '40px' }) padding?:string | null;
 }
 </script>
 <style lang="scss">

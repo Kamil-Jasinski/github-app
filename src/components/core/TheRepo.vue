@@ -132,16 +132,16 @@ import RepositoryService from "@/services/RepositoryService";
    },
 })
 export default class TheRepo extends Vue {
-   @Prop({ default: "auto" }) width!:string;
-   @Prop({ default: "auto" }) minWidth!:string;
-   @Prop({ default: "25px 10px" }) margin!:string;
-   @Prop({ default: null }) bgColor?:string | any;
-   @Prop({ default: null }) borderColor?:string | any;
-   @Prop({ default: "15px" }) borderRadius!:string;
-   @Prop({ default: null }) boxShadow?:string | any;
-   @Prop({ default: null }) bg?:string | any;
-   @Prop({ default: null }) userLogin?:string | any;
-   @Prop({ default: null }) repoName?:string | any;
+   @Prop({ default: "auto" }) width?:string | null;
+   @Prop({ default: "auto" }) minWidth?:string | null;
+   @Prop({ default: "25px 10px" }) margin?:string | null;
+   @Prop({ default: null }) bgColor?:string | null;
+   @Prop({ default: null }) borderColor?:string | null;
+   @Prop({ default: "15px" }) borderRadius?:string | null;
+   @Prop({ default: null }) boxShadow?:string | null;
+   @Prop({ default: null }) bg?:string | null;
+   @Prop({ default: null }) userLogin!:string;
+   @Prop({ default: null }) repoName!:string;
    @Prop({ default: "master" }) branch!:string;
 
    openCommitsModal = false;
@@ -152,7 +152,7 @@ export default class TheRepo extends Vue {
    notify!:string;
 
    @Watch("openCommitsModal")
-   async getCommits():Promise<any> {
+   async getCommits():Promise<void> {
       try {
          this.commits = await RepositoryService.getCommits(
             this.userLogin,

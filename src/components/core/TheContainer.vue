@@ -21,14 +21,14 @@ import { Component, Vue, Prop } from "vue-property-decorator";
 
 @Component
 export default class TheContainer extends Vue {
-   @Prop({ default: "auto" }) width!:string;
-   @Prop({ default: "auto" }) minWidth!:string;
-   @Prop({ default: "10px" }) margin!:string;
-   @Prop({ default: null }) bgColor?:string;
-   @Prop({ default: null }) borderColor?:string;
-   @Prop({ default: "15px" }) borderRadius!:string;
-   @Prop({ default: null }) boxShadow?:string;
-   @Prop({ default: null }) bg?:string;
+   @Prop({ default: "auto" }) width?:string | null;
+   @Prop({ default: "auto" }) minWidth?:string | null;
+   @Prop({ default: "10px" }) margin?:string | null;
+   @Prop({ default: null }) bgColor?:string | null;
+   @Prop({ default: null }) borderColor?:string | null;
+   @Prop({ default: "15px" }) borderRadius?:string | null;
+   @Prop({ default: null }) boxShadow?:string | null;
+   @Prop({ default: null }) bg?:string | null;
 }
 </script>
 <style lang="scss" >

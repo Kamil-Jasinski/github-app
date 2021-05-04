@@ -198,6 +198,7 @@ import { Component, Vue, Watch } from "vue-property-decorator";
 import TheTitle from "@/components/core/TheTitle.vue";
 import SearchBar from "@/components/SearchBar.vue";
 import TheRepo from "@/components/core/TheRepo.vue";
+// import UserService, {reposPerPage} from "@/services/UserService";
 import UserService from "@/services/UserService";
 import gsap from "gsap";
 import CSSPlugin from "gsap/CSSPlugin";
@@ -211,8 +212,102 @@ import CSSPlugin from "gsap/CSSPlugin";
 })
 export default class UserRepos extends Vue {
    goToPage = 1;
-   repos:any = [];
+   // repos: reposPerPage = {
+   //       id: 0,
+   //      node_id: '',
+   //      name: '',
+   //      full_name: '',
+   //      private: false,
+   //      owner: {
+   //          login: '',
+   //          id: 0,
+   //          node_id: '',
+   //          avatar_url: '',
+   //          gravatar_id: '',
+   //          url: '',
+   //          html_url: '',
+   //          followers_url: '',
+   //          following_url: '',
+   //          gists_url: '',
+   //          starred_url: '',
+   //          subscriptions_url: '',
+   //          organizations_url: '',
+   //          repos_url: '',
+   //          events_url: '',
+   //          received_events_url: '',
+   //          type: '',
+   //          site_admin: false
+   //      },
+   //      html_url: '',
+   //      description: '',
+   //      fork: false,
+   //      url: '',
+   //      forks_url: '',
+   //      keys_url: '',
+   //      collaborators_url: '',
+   //      teams_url: '',
+   //      hooks_url: '',
+   //      issue_events_url: '',
+   //      events_url: '',
+   //      assignees_url: '',
+   //      branches_url: '',
+   //      tags_url: '',
+   //      blobs_url: '',
+   //      git_tags_url: '',
+   //      git_refs_url: '',
+   //      trees_url: '',
+   //      statuses_url: '',
+   //      languages_url: '',
+   //      stargazers_url: '',
+   //      contributors_url: '',
+   //      subscribers_url: '',
+   //      subscription_url: '',
+   //      commits_url: '',
+   //      git_commits_url: '',
+   //      comments_url: '',
+   //      issue_comment_url: '',
+   //      contents_url: '',
+   //      compare_url: '',
+   //      merges_url: '',
+   //      archive_url: '',
+   //      downloads_url: '',
+   //      issues_url: '',
+   //      pulls_url: '',
+   //      milestones_url: '',
+   //      notifications_url: '',
+   //      labels_url: '',
+   //      releases_url: '',
+   //      deployments_url: '',
+   //      created_at: new Date,
+   //      updated_at: new Date,
+   //      pushed_at: new Date,
+   //      git_url: '',
+   //      ssh_url: '',
+   //      clone_url: '',
+   //      svn_url: '',
+   //      homepage: null,
+   //      size: 0,
+   //      stargazers_count: 0,
+   //      watchers_count: 0,
+   //      language: '',
+   //      has_issues: false,
+   //      has_projects: false,
+   //      has_downloads: false,
+   //      has_wiki: false,
+   //      has_pages: false,
+   //      forks_count: 0,
+   //      mirror_url: null,
+   //      archived: false,
+   //      disabled: false,
+   //      open_issues_count: 0,
+   //      license: null,
+   //      forks: 0,
+   //      open_issues: 0,
+   //      watchers: 0,
+   //      default_branch: ''
+   // };
    userData:[] = [];
+   repos: any[] = [];
    reposLoaded = false;
    userDataLoaded = false;
    pagerAnim = false;
@@ -253,11 +348,7 @@ export default class UserRepos extends Vue {
 
    async pager():Promise<void> {
       try {
-         const repos = await UserService.getReposPerPage(this.userLogin, this.goToPage, this.perPage)
-
-         //Store user repos
-         this.repos = repos;
-         console.log(repos);
+         this.repos = await UserService.getReposPerPage(this.userLogin, this.goToPage, this.perPage);
 
          //Store current page
          this.$store.commit("SET_CURRENT_PAGE", {
@@ -326,7 +417,7 @@ export default class UserRepos extends Vue {
             this.perPage,
             this.goToPage
          );
-         this.repos = repos!.data;
+         this.repos = repos?.data;
 
          //Loading Off
          this.setLoader(false);
@@ -350,10 +441,10 @@ export default class UserRepos extends Vue {
       this.setLoader(true);
       try {
          userResponse = await UserService.getUser(this.userLogin);
-         this.userData = userResponse!.data;
+         this.userData = userResponse?.data;
 
          //Store user repos max page
-         const userReposNumber = userResponse!.data.public_repos;
+         const userReposNumber = userResponse?.data.public_repos;
          if (this.perPage) {
             userMaxReposPages = Math.ceil(userReposNumber / this.perPage);
          } else {

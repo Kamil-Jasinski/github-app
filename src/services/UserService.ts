@@ -23,7 +23,7 @@ export default new (class UserService {
     return repos;
   }
 
-  async getReposPerPage<reposPerPage>(userLogin:string, goToPage:number, perPage:number) {
+  async getReposPerPage(userLogin:string, goToPage:number, perPage:number) {
     const reposPerPage = await Vue.axios.get(
       `https://api.github.com/users/${userLogin}/repos?page=${goToPage}&per_page=${perPage}`
    );

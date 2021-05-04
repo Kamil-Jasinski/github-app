@@ -216,9 +216,9 @@ import CSSPlugin from "gsap/CSSPlugin";
    },
 })
 export default class UserPage extends Vue {
-   userAvatarUrl!: string ;
-   userName!:string;
-   user: any; 
+   userAvatarUrl?: string | null ;
+   userName?:string | null;
+   user:any; 
 
    // ERROR MODAL
    get showErrorModal():boolean {

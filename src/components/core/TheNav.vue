@@ -31,7 +31,7 @@ export default class TheNav extends Vue {
    @Prop({ default: "Home" }) routeName!:string;
    @Prop({ default: null }) paramUserLogin!:string;
    @Prop({ default: null }) user!:string;
-   @Prop({ default: "Home" }) navText?:string;
+   @Prop({ default: "Home" }) navText?:string|null;
    @Prop({ default: null }) menuType!:string;
 
    redirect():void {
