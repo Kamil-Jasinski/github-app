@@ -211,7 +211,7 @@ import CSSPlugin from "gsap/CSSPlugin";
 })
 export default class UserRepos extends Vue {
    goToPage = 1;
-   repos:[] = [];
+   repos:any = [];
    userData:[] = [];
    reposLoaded = false;
    userDataLoaded = false;
@@ -250,14 +250,14 @@ export default class UserRepos extends Vue {
    get perPage():number {
       return this.$store.getters.currentPerPage;
    }
-   async pager():Promise<any> {
+
+   async pager():Promise<void> {
       try {
-         const repos = await Vue.axios.get(
-            `https://api.github.com/users/${this.userLogin}/repos?page=${this.goToPage}&per_page=${this.perPage}`
-         );
+         const repos = await UserService.getReposPerPage(this.userLogin, this.goToPage, this.perPage)
 
          //Store user repos
-         this.repos = repos.data;
+         this.repos = repos;
+         console.log(repos);
 
          //Store current page
          this.$store.commit("SET_CURRENT_PAGE", {
@@ -326,7 +326,7 @@ export default class UserRepos extends Vue {
             this.perPage,
             this.goToPage
          );
-         this.repos = repos.data;
+         this.repos = repos!.data;
 
          //Loading Off
          this.setLoader(false);
@@ -344,16 +344,16 @@ export default class UserRepos extends Vue {
       }
    }
 
-   async getUser():Promise<any> {
+   async getUser():Promise<void> {
       let userResponse;
-      let userMaxReposPages;
+      let userMaxReposPages:number;
       this.setLoader(true);
       try {
          userResponse = await UserService.getUser(this.userLogin);
-         this.userData = userResponse.data;
+         this.userData = userResponse!.data;
 
          //Store user repos max page
-         const userReposNumber = userResponse.data.public_repos;
+         const userReposNumber = userResponse!.data.public_repos;
          if (this.perPage) {
             userMaxReposPages = Math.ceil(userReposNumber / this.perPage);
          } else {

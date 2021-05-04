@@ -35,9 +35,9 @@ import { Component, Vue, Prop } from "vue-property-decorator";
 
 @Component
 export default class UserCard extends Vue {
-   @Prop({ default: null }) userAvatarUrl:string;
-   @Prop({ default: null }) userLogin:string;
-   @Prop({ default: null }) userName:string;
+   @Prop({ default: null }) userAvatarUrl!:string;
+   @Prop({ default: null }) userLogin!:string;
+   @Prop({ default: null }) userName!:string;
 
    goToUserPage():void {
       // Go to USER PAGE

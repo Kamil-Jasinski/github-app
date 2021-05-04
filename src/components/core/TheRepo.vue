@@ -135,13 +135,13 @@ export default class TheRepo extends Vue {
    @Prop({ default: "auto" }) width!:string;
    @Prop({ default: "auto" }) minWidth!:string;
    @Prop({ default: "25px 10px" }) margin!:string;
-   @Prop({ default: null }) bgColor!:string | any;
-   @Prop({ default: null }) borderColor!:string | any;
+   @Prop({ default: null }) bgColor?:string | any;
+   @Prop({ default: null }) borderColor?:string | any;
    @Prop({ default: "15px" }) borderRadius!:string;
-   @Prop({ default: null }) boxShadow!:string | any;
-   @Prop({ default: null }) bg!:string | any;
-   @Prop({ default: null }) userLogin!:string | any;
-   @Prop({ default: null }) repoName!:string | any;
+   @Prop({ default: null }) boxShadow?:string | any;
+   @Prop({ default: null }) bg?:string | any;
+   @Prop({ default: null }) userLogin?:string | any;
+   @Prop({ default: null }) repoName?:string | any;
    @Prop({ default: "master" }) branch!:string;
 
    openCommitsModal = false;

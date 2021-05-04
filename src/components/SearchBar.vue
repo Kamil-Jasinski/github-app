@@ -71,10 +71,10 @@ import { Component, Vue, Prop, Watch } from "vue-property-decorator";
 })
 export default class SearchBar extends Vue {
    @Prop({ default: true }) isHomepage!:boolean;
-   @Prop({ default: "User name..." }) placeholder!:string;
+   @Prop({ default: "User name..." }) placeholder?:string;
 
-   // userName!:string ;
-   userName = '' ; // from input to route @param
+   // userName!:string;
+   userName = ''  ; // from input to route @param
    notify!:string;
 
    perPage = this.$store.getters.currentPerPage;

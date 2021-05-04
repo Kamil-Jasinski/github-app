@@ -28,11 +28,11 @@ import { Component, Vue, Prop } from "vue-property-decorator";
 
 @Component
 export default class TheNav extends Vue {
-   @Prop({ default: "Home" }) routeName:string;
-   @Prop({ default: null }) paramUserLogin:string;
-   @Prop({ default: null }) user:string;
-   @Prop({ default: "Home" }) navText:string;
-   @Prop({ default: null }) menuType:string;
+   @Prop({ default: "Home" }) routeName!:string;
+   @Prop({ default: null }) paramUserLogin!:string;
+   @Prop({ default: null }) user!:string;
+   @Prop({ default: "Home" }) navText?:string;
+   @Prop({ default: null }) menuType!:string;
 
    redirect():void {
       this.$router.push({
