@@ -42,6 +42,9 @@ body {
 
 body {
    background-color: #24292e;
+   background-image: radial-gradient(#212121 20%, #e5393500 20%);
+    background-position: 0 0;
+    background-size: 8px 8px;
 }
 #app {
    display: flex;

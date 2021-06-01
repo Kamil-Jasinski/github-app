@@ -6,6 +6,22 @@
    </Portal>
 </template>
 
+<script lang="ts">
+import { Component, Vue, Watch } from "vue-property-decorator";
+
+@Component
+export default class TheLoader extends Vue {
+   mounted():void {
+      // Turn off the loader if loading too long
+      setTimeout(() => {
+            this.$store.commit("SET_OPL", {
+               OPL: false,
+            });
+      }, 5500);
+   }
+}
+</script>
+
 <style lang="scss" scoped>
 .loader-wrapper {
    display: flex;

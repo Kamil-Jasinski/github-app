@@ -25,19 +25,22 @@
             <TheContainer
                width="95%"
                :bgColor="'#2C445C'"
-               :bg="'linear-gradient(20deg, #2C445C 60%, #8396A8 100%)'"
+               :bg="'linear-gradient(20deg, rgb(45 50 56) 60%, rgb(52 65 78) 100%)'"
+                class="sticky"
             >
                <div class="owner-card">
                   <div
                      class="avatar"
                      @mouseover="animateAvatar(true)"
                      @mouseleave="animateAvatar(false)"
+                     v-tooltip.bottom-end="'Go to ' + (userData.name?userData.name:null) + ' user page.'"
                   >
                      <img
+                        
                         @click="goToUserPage"
                         v-if="userData.avatar_url"
                         :src="userData.avatar_url"
-                        alt=""
+                        alt="User Avatar"
                      />
                      <img
                         @click="goToUserPage"
@@ -47,10 +50,11 @@
                      />
                   </div>
                   <div class="details">
-                     <h2 v-if="userData.name" class="align-self-center name">
+                     <h2 @click="goToUserPage" v-if="userData.name" class="align-self-center name">
                         {{ userData.name }}
                      </h2>
                      <h3
+                        @click="goToUserPage"
                         v-if="userLogin && userData.name"
                         name="login"
                         class="align-self-center login"
@@ -58,13 +62,14 @@
                         ({{ userLogin }})
                      </h3>
                      <h2
+                        @click="goToUserPage"   
                         v-else-if="!userData.name"
                         name="login"
                         class="align-self-center name"
                      >
                         {{ userLogin }}
                      </h2>
-                     <h2 v-else name="login" class="align-self-center name">
+                     <h2 @click="goToUserPage" v-else name="login" class="align-self-center name">
                         User
                      </h2>
                      <hr class="separator" />
@@ -76,14 +81,14 @@
                      </p>
                      <p name="followers-number">
                         Followed by
-                        <span class="bold">{{
+                        <span v-tooltip="followedByUsersTooltip" @click="userData.followers !== 0 ? getFollowers() : log('No need to connect with API, result gonna be empty.')" class="bold underline clickable">{{
                            userData.followers ? userData.followers : "0"
                         }}</span>
                         github users.
                      </p>
                      <p name="following-number">
                         Following
-                        <span class="bold">{{
+                        <span v-tooltip="followingUsersTooltip" @click="userData.following !== 0 ? getFollowedUsers() : log('No need to connect with API, result gonna be empty.')" class="bold underline clickable">{{
                            userData.following ? userData.following : "0"
                         }}</span>
                         github users.
@@ -151,13 +156,53 @@
                      ><span class="bold">Forks:</span>
                      {{ repo.forks }}</template
                   >
+                  <template slot="fork"
+                     ><span class="bold">Fork:</span>
+                    
+                        <font-awesome-icon v-tooltip="'You can fork to this repo.'" v-if="repo.fork" class="icon icon--true" icon="check-circle" />
+                        <font-awesome-icon v-tooltip="'You can\'t fork to this repo.'" v-else class="icon icon--false" icon="times-circle" />
+                     
+                  </template
+                  >
+                   <template slot="has_issues"
+                     ><span class="bold">Has Issues:</span>
+                    
+                        <font-awesome-icon v-tooltip="'The repo has some issues.'" v-if="repo.has_issues" class="icon icon--true" icon="check-circle" />
+                        <font-awesome-icon v-tooltip="'The repo have not any issues.'" v-else class="icon icon--false" icon="times-circle" />
+                     
+                  </template
+                  >
+                   <template slot="has_pages"
+                     ><span class="bold">Has Pages:</span>
+                    
+                        <font-awesome-icon v-tooltip="'The repo has some pages.'" v-if="repo.has_pages" class="icon icon--true" icon="check-circle" />
+                        <font-awesome-icon v-tooltip="'The repo have not any pages.'" v-else class="icon icon--false" icon="times-circle" />
+                     
+                  </template
+                  >
+                   <template slot="has_wiki"
+                     ><span class="bold">Has Wiki:</span>
+                    
+                        <font-awesome-icon v-tooltip="'The repo has wiki.'" v-if="repo.has_wiki" class="icon icon--true" icon="check-circle" />
+                        <font-awesome-icon v-tooltip="'The repo have not any wiki.'" v-else class="icon icon--false" icon="times-circle" />
+                     
+                  </template
+                  >
+                   <template slot="has_downloads"
+                     ><span class="bold">Has Downloads:</span>
+                    
+                        <font-awesome-icon v-tooltip="'The repo have some downloads.'" v-if="repo.has_downloads" class="icon icon--true" icon="check-circle" />
+                        <font-awesome-icon v-tooltip="'The repo have not any downloads.'" v-else class="icon icon--false" icon="times-circle" />
+                     
+                  </template
+                  >
                   <template slot="githubUrl">
-                     <span class="bold">Github Url:</span> {{ repo.svn_url }}
+                     <span class="bold">Github Url:</span> <a v-tooltip="'This link gonna take you away from this site to the repository page on github page.'" :href="repo.svn_url" target="blank">{{ repo.svn_url }}</a>
                   </template>
 
                   <template slot="cloneUrl">
                      <span class="bold">Clone Url:</span>
-                     {{ repo.clone_url }}
+                     <span v-tooltip="'Copy this link to clone this repository.'"> {{ repo.clone_url }}</span>
                   </template>
 
                   <template slot="createdAt">
@@ -169,6 +214,104 @@
          </section>
       </div>
 
+      <!-- Followers -->
+      <TheModal
+         v-if="openFollowersModal && followers && followers.length > 0"
+         @close="openFollowersModal = false"
+      >
+         <template #header>Followers:</template>
+
+         <template #body>
+            <ul v-if="followers.length > 0">
+               <li v-for="item in followers" :key="item.id">
+                  <UserCard
+                     :userLogin="item.login"
+                     :userAvatarUrl="item.avatar_url"
+                  />
+               </li>
+            </ul>
+
+               <!-- Pager -->
+            <div v-if="followers.length > 0" class="pager">
+               <p class="__details">
+                  Followers Page:
+                  <span class="bold"
+                     >{{ followersPager[0] }} / {{ Math.ceil(userData.followers / followersPager[1]) }}</span
+                  >
+               </p>
+               <div class="__page-form">
+                  <div>
+                     <button :disabled="!(followersPager[0] >= 2)" @click="getFollowers('prev')">Prev. Page</button>
+                     <button :disabled="followers.length < followersPager[1]" @click="getFollowers('next')">Next Page</button>
+                  </div>
+               </div>
+            </div>
+            <div v-if="followers.length <= 0">There is no more to show</div>
+         </template>
+
+         <template #footer>
+            <button
+               class="modal-default-button"
+               @click="openFollowersModal = false"
+            >
+               OK
+            </button>
+         </template>
+      </TheModal>
+
+       <!-- Followed Users -->
+      <TheModal
+      v-if="openFollowedUsersModal && followedUsers && followedUsers.length > 0"
+       
+         @close="openFollowedUsersModal = false"
+      >
+         <template #header>Followed Users:</template>
+
+         <template #body>
+            <ul v-if="followedUsers.length > 0">
+               <li v-for="item in followedUsers" :key="item.id">
+                  <UserCard
+                     :userLogin="item.login"
+                     :userAvatarUrl="item.avatar_url"
+                  />
+               </li>
+            </ul>
+
+               <!-- Pager -->
+            <div v-if="followedUsers.length > 0" class="pager">
+               <p class="__details">
+                  Followed Users Page:
+                  <span class="bold"
+                     >{{ followedPager[0] }} / {{ Math.ceil(userData.following / followedPager[1]) }}</span
+                  >
+               </p>
+               <div class="__page-form">
+                  <div>
+                     <button :disabled="!(followedPager[0] >= 2)" @click="getFollowers('prev')">Prev. Page</button>
+                     <button :disabled="followedUsers.length < followedPager[1]" @click="getFollowedUsers('next')">Next Page</button>
+                  </div>
+               </div>
+            </div>
+            <div v-if="followedUsers.length <= 0">There is no more to show</div>
+         </template>
+
+         <template #footer>
+            <button
+               class="modal-default-button"
+               @click="openFollowedUsersModal = false; followedPager[0] = 1"
+            >
+               OK
+            </button>
+         </template>
+      </TheModal>
+      <TheLoader
+         v-if="
+            openFollowedUsersModal && followedUsers.length === 0 && OPL ||
+            openFollowersModal && followers.length === 0 && OPL
+         "
+      />
+
+      <!-- Errors -->
       <TheModal
          v-if="showErrorModal"
          @close="
@@ -194,6 +337,7 @@
 </template>
 
 <script lang="ts">
+import UserCard from "@/components/core/UserCard.vue";
 import { Component, Vue, Watch } from "vue-property-decorator";
 import TheTitle from "@/components/core/TheTitle.vue";
 import SearchBar from "@/components/SearchBar.vue";
@@ -208,6 +352,7 @@ import CSSPlugin from "gsap/CSSPlugin";
       TheTitle,
       SearchBar,
       TheRepo,
+      UserCard
    },
 })
 export default class UserRepos extends Vue {
@@ -306,11 +451,43 @@ export default class UserRepos extends Vue {
    //      watchers: 0,
    //      default_branch: ''
    // };
-   userData:[] = [];
+   userData:any = [];
    repos: any[] = [];
    reposLoaded = false;
    userDataLoaded = false;
    pagerAnim = false;
+   //Followers
+   openFollowersModal = false;
+   followersPager = [1,5] // [page / perPage]
+   followers = [];
+   //Following
+   openFollowedUsersModal = false;
+   followedPager = [1,5] // [page / perPage]
+   followedUsers = [];
+   nts = 'Nothing to show.';
+   
+   // Loader - OPL (Open Loader ?)
+   get OPL() {
+      return this.$store.getters.OPL
+   }
+
+
+   // Tooltips
+   get followedByUsersTooltip():string {
+      if (this.userData.followers > 0) {
+         return  `Click to see users following ${this.userLogin?this.userLogin:this.userData.name}`;
+         } else {return this.nts}
+   }
+   // @Watch("loadData")
+   get followingUsersTooltip():string {
+         if (this.userData.following > 0) {
+            return `Click to see users followed by ${this.userLogin?this.userLogin:this.userData.name}`;
+         } else {return this.nts}
+   }
+
+
+
+
    get userLogin():string {
       return this.$route.params.user;
    }
@@ -334,6 +511,38 @@ export default class UserRepos extends Vue {
       });
       this.$router.push({ name: "Home" });
    }
+   //Get Followers
+    async getFollowers(mode:string):Promise<void> {
+       this.openFollowersModal = true;
+        if (mode === 'next' && mode != null) {
+             this.followersPager[0]++;
+         } else if (mode === 'prev'){
+            this.followersPager[0] >= 2 ? this.followersPager[0]-- : this.followersPager[0] = 1;
+         } else {
+            //Do nothing
+         }
+      try {
+         this.followers = await UserService.getFollowers(this.userLogin, this.openFollowersModal, this.followersPager[0], this.followersPager[1]);
+      } catch (err) {
+         console.warn(err.message);
+      }
+   }
+   //Get Followed Users
+   async getFollowedUsers(mode:string):Promise<void> {
+      this.openFollowedUsersModal = true;
+      if (mode === 'next' && mode != null) {
+            this.followedPager[0]++;
+      } else if (mode === 'prev'){
+         this.followedPager[0] >= 2 ? this.followedPager[0]-- : this.followedPager[0] = 1;
+      } else {
+         //Do nothing
+      }
+   try {
+      this.followedUsers = await UserService.getFollowedUsers(this.userLogin, this.openFollowedUsersModal, this.followedPager[0], this.followedPager[1]);
+   } catch (err) {
+      console.warn(err.message);
+   }
+}
 
    // PAGER & FILTER
    get order():string {
@@ -394,6 +603,7 @@ export default class UserRepos extends Vue {
          this.getUser();
       }
 
+      
       //Store current page
       this.$store.commit("SET_CURRENT_PAGE", {
          currentPage: this.goToPage,
@@ -481,6 +691,11 @@ export default class UserRepos extends Vue {
       }
    }
 
+   //Other
+   log(text:string) {
+      console.warn(text);
+   }
+
    //ANIMATIONS
    animateUserReposPage():void {
       gsap.registerPlugin(CSSPlugin);
@@ -523,7 +738,7 @@ export default class UserRepos extends Vue {
             .fromTo(
                ".avatar",
                { scale: 0.95 },
-               { scale: 1, duration: 1.5, ease: "elastic.out(5.5, 0.7)" }
+               { scale: 1, duration: 1.5, ease: "elastic.out(5.5, 0.7)"}, "<"
             );
 
          this.userDataLoaded = false;
@@ -566,6 +781,7 @@ export default class UserRepos extends Vue {
    // Life Cycle
    created():void {
       this.loadData();
+      
    }
 
    updated():void {
@@ -611,8 +827,12 @@ export default class UserRepos extends Vue {
    display: flex;
    justify-content: center;
    width: 45%;
-
+   .sticky {
+      position: sticky;
+      top: 20px;
+   }
    .owner-card {
+      
       display: flex;
       flex-direction: column;
 
@@ -641,6 +861,13 @@ export default class UserRepos extends Vue {
             font-size: 3rem;
             margin-top: 20px;
             color: $third-app-color-dark;
+            text-shadow: 2px 2px 30px #24292e;
+            cursor: pointer;
+            transition: all .3s ease;
+            &:hover {
+               text-decoration: underline;
+               transform: translateY(-10px);
+            }
          }
          .login {
             font-size: 2rem;
@@ -668,35 +895,6 @@ export default class UserRepos extends Vue {
          .repo-el {
             display: block;
             margin: 10px 20px;
-         }
-      }
-   }
-}
-
-.pager {
-   display: flex;
-   padding: 0 10px;
-   flex-direction: row;
-   justify-content: space-between;
-   align-items: center;
-   .__page-form {
-      input,
-      button {
-         padding: 5px;
-         background-color: #ffffff20;
-         color: #fff;
-         border: none;
-         outline: none;
-      }
-      input {
-         width: 50px;
-      }
-      button {
-         margin-left: 5px;
-         transition: background-color 0.3s ease-out;
-         &:hover {
-            background-color: $third-app-color-dark;
-            cursor: pointer;
          }
       }
    }

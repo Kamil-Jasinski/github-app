@@ -14,7 +14,7 @@
          <TheContainer
             width="95%"
             :bgColor="'#2C445C'"
-            :bg="'linear-gradient(20deg, #2C445C 60%, #8396A8 100%)'"
+            :bg="'linear-gradient(0deg, rgb(45, 50, 56) 50%, rgb(76 89 105) 100%)'"
          >
             <div class="owner-card">
                <div class="card-header">
@@ -30,12 +30,12 @@
                      </p>
                      <p name="followers-number" class="git-info-el">
                         Followed by
-                        <span class="bold">{{ user.followers }}</span> github
+                        <span @click.stop="user.followers !== 0 ? getFollowers() : null"  class="bold clickable underline">{{ user.followers }}</span> github
                         users
                      </p>
                      <p name="following-number" class="git-info-el">
                         Following
-                        <span class="bold">{{ user.following }}</span> github
+                        <span @click.prevent="user.following !== 0 ? getFollowedUsers() : null" class="bold clickable underline">{{ user.following }}</span> github
                         users
                      </p>
                      <p
@@ -129,8 +129,8 @@
                            icon="file-word"
                         />
                         <p>
-                           <span class="bold">Blog:</span>
-                           {{ user.blog }}
+                           <span class="bold">Blog: </span>
+                          <a :href="user.blog" target="blank"> {{ user.blog }} </a>
                         </p>
                      </div>
 
@@ -183,6 +183,105 @@
          </TheContainer>
       </section>
 
+      <!-- Followers -->
+      <TheModal
+         v-if="openFollowersModal && followers && followers.length > 0"
+         @close="openFollowersModal = false"
+      >
+         <template #header>Followers:</template>
+
+         <template #body>
+            <ul v-if="followers.length > 0">
+               <li v-for="item in followers" :key="item.id">
+                  <UserCard
+                     :userLogin="item.login"
+                     :userAvatarUrl="item.avatar_url"
+                  />
+               </li>
+            </ul>
+
+               <!-- Pager -->
+            <div v-if="followers.length > 0" class="pager">
+               <p class="__details">
+                  Followers Page:
+                  <span class="bold"
+                     >{{ followersPager[0] }} / {{ Math.ceil(user.followers / followersPager[1]) }}</span
+                  >
+               </p>
+               <div class="__page-form">
+                  <div>
+                     <button :disabled="!(followersPager[0] >= 2)" @click="getFollowers('prev')">Prev. Page</button>
+                     <button :disabled="followers.length < followersPager[1]" @click="getFollowers('next')">Next Page</button>
+                  </div>
+               </div>
+            </div>
+            <div v-if="followers.length <= 0">There is no more to show</div>
+         </template>
+
+         <template #footer>
+            <button
+               class="modal-default-button"
+               @click="openFollowersModal = false"
+            >
+               OK
+            </button>
+         </template>
+      </TheModal>
+
+       <!-- Followed Users -->
+      <TheModal
+         v-if="openFollowedUsersModal && followedUsers && followedUsers.length > 0"
+         @close="openFollowedUsersModal = false"
+      >
+         <template #header>Followed Users:</template>
+
+         <template #body>
+            <ul v-if="followedUsers.length > 0">
+               <li v-for="item in followedUsers" :key="item.id">
+                  <UserCard
+                     :userLogin="item.login"
+                     :userAvatarUrl="item.avatar_url"
+                  />
+               </li>
+            </ul>
+
+               <!-- Pager -->
+            <div v-if="followedUsers.length > 0" class="pager">
+               <p class="__details">
+                  Followed Users Page:
+                  <span class="bold"
+                     >{{ followedPager[0] }} / {{ Math.ceil(user.following / followedPager[1]) }}</span
+                  >
+               </p>
+               <div class="__page-form">
+                  <div>
+                     <button :disabled="!(followedPager[0] >= 2)" @click="getFollowers('prev')">Prev. Page</button>
+                     <button :disabled="followedUsers.length < followedPager[1]" @click="getFollowedUsers('next')">Next Page</button>
+                  </div>
+               </div>
+            </div>
+            <div v-if="followedUsers.length <= 0">There is no more to show</div>
+         </template>
+
+         <template #footer>
+            <button
+               class="modal-default-button"
+               @click="openFollowedUsersModal = false; followedPager[0] = 1"
+            >
+               OK
+            </button>
+         </template>
+      </TheModal>
+
+      <!-- Loader -->
+      <TheLoader
+         v-if="
+            openFollowedUsersModal && followedUsers.length === 0 && OPL ||
+            openFollowersModal && followers.length === 0 && OPL
+         "
+      />
+
+      <!-- Errors -->
       <TheModal v-if="showErrorModal" @close="closeErrorModal">
          <h3 slot="header">Error</h3>
          <p slot="body">{{ errorMessage }}</p>
@@ -203,6 +302,7 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
+import UserCard from "@/components/core/UserCard.vue";
 import TheTitle from "@/components/core/TheTitle.vue";
 import TheRepo from "@/components/core/TheRepo.vue";
 import UserService from "@/services/UserService";
@@ -213,12 +313,53 @@ import CSSPlugin from "gsap/CSSPlugin";
    components: {
       TheTitle,
       TheRepo,
+      UserCard
    },
 })
 export default class UserPage extends Vue {
    userAvatarUrl?: string | null ;
    userName?:string | null;
-   user:any; 
+   user:any;
+   //Followers
+   openFollowersModal = false;
+   followersPager = [1,5] // [page / perPage]
+   followers = [];
+   //Following
+   openFollowedUsersModal = false;
+   followedPager = [1,5] // [page / perPage]
+   followedUsers = [];
+    //Get Followers
+    async getFollowers(mode:string):Promise<void> {
+       this.openFollowersModal = true;
+        if (mode === 'next' && mode != null) {
+             this.followersPager[0]++;
+         } else if (mode === 'prev'){
+            this.followersPager[0] >= 2 ? this.followersPager[0]-- : this.followersPager[0] = 1;
+         } else {
+            //Do nothing
+         }
+      try {
+         this.followers = await UserService.getFollowers(this.user.login, this.openFollowersModal, this.followersPager[0], this.followersPager[1]);
+      } catch (err) {
+         console.warn(err.message);
+      }
+   }
+   //Get Followed Users
+   async getFollowedUsers(mode:string):Promise<void> {
+      this.openFollowedUsersModal = true;
+      if (mode === 'next' && mode != null) {
+            this.followedPager[0]++;
+      } else if (mode === 'prev'){
+         this.followedPager[0] >= 2 ? this.followedPager[0]-- : this.followedPager[0] = 1;
+      } else {
+         //Do nothing
+      }
+   try {
+      this.followedUsers = await UserService.getFollowedUsers(this.user.login, this.openFollowedUsersModal, this.followedPager[0], this.followedPager[1]);
+   } catch (err) {
+      console.warn(err.message);
+   }
+}
 
    // ERROR MODAL
    get showErrorModal():boolean {
@@ -332,8 +473,10 @@ export default class UserPage extends Vue {
          );
    }
 
-   updated():void {
-      this.animateUserPage();
+   mounted():void {
+      setTimeout(() => {
+         this.animateUserPage();
+      }, 300);
    }
 }
 </script>
@@ -411,6 +554,7 @@ export default class UserPage extends Vue {
             p {
                font-size: 1.5rem;
                align-self: flex-start;
+              
             }
             .user-card-icon {
                margin-right: 10px;
@@ -418,7 +562,7 @@ export default class UserPage extends Vue {
                font-size: 1.8rem;
             }
             svg > path {
-               color: $secondary-app-color-light;
+               color: $third-app-color-dark;
             }
          }
       }

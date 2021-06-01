@@ -32,6 +32,10 @@ import CSSPlugin from "gsap/CSSPlugin";
    },
 })
 export default class Home extends Vue {
+   get isInit() {
+      return this.$store.getters.isInit;
+   }
+
    animateHomePage():void {
       gsap.registerPlugin(CSSPlugin);
       const homeTimeline = gsap.timeline();
@@ -54,10 +58,17 @@ export default class Home extends Vue {
             { autoAlpha: 1, y: 0, duration: 1 },
             "-=.3"
          );
+
+         // Show animation only once
+           this.$store.commit("SET_IS_INIT", {
+               isInit: false,
+         });
    }
 
    mounted():void {
-      this.animateHomePage();
+      if(this.isInit) {
+         this.animateHomePage();
+      }
    }
 }
 </script>

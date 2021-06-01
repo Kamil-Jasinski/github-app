@@ -4,5 +4,6 @@ declare module "*.vue" {
 }
 
 declare module "vue-luxon";
+declare module "v-tooltip";
 // declare module "vue-select";
 // declare module "@glidejs/glide";

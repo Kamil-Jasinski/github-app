@@ -14,6 +14,8 @@ export default new Vuex.Store({
     errorMessage: "",
     showErrorModal: false,
     isLoading: false,
+    isInit: true,
+    OPL: true, // Open loader ?
   },
   mutations: {
     SET_CURRENT_USER_LOGIN(state, payload) {
@@ -42,6 +44,12 @@ export default new Vuex.Store({
     },
     SET_IS_LOADING(state, payload) {
       state.isLoading = payload.isLoading;
+    },
+    SET_IS_INIT(state, payload) {
+      state.isInit = payload.isInit;
+    },
+    SET_OPL(state, payload) {
+      state.OPL = payload.OPL;
     },
   },
   actions: {},
@@ -73,6 +81,12 @@ export default new Vuex.Store({
     },
     isLoading: (state):boolean => {
       return state.isLoading;
+    },
+    isInit: (state):boolean => {
+      return state.isInit;
+    },
+    OPL: (state):boolean => {
+      return state.OPL;
     },
   },
 });

@@ -26,6 +26,8 @@
             {{ userLogin }}
          </h2>
          <h2 v-else name="login" class="name">User</h2>
+
+         <div v-if="contributions !== null" class="contributions">Contributions: {{ contributions }}</div>
       </div>
    </div>
 </template>
@@ -37,7 +39,10 @@ import { Component, Vue, Prop } from "vue-property-decorator";
 export default class UserCard extends Vue {
    @Prop({ default: null }) userAvatarUrl?:string | null;
    @Prop({ default: null }) userLogin!:string;
+   @Prop({ default: null }) contributions?:number;
    @Prop({ default: null }) userName?:string | null;
+
+   openFollowersModal = false;
 
    goToUserPage():void {
       // Go to USER PAGE
@@ -83,6 +88,7 @@ export default class UserCard extends Vue {
 
    .details {
       display: flex;
+      flex-flow: column wrap;
       padding: 20px;
       width: 100%;
       max-width: 650px;
@@ -102,6 +108,11 @@ export default class UserCard extends Vue {
       p {
          font-size: 1.5rem;
          padding: 10px;
+      }
+
+      .contributions {
+         font-size: 1.2em;
+         margin-top: 10px;
       }
    }
 }

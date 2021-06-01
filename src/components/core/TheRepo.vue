@@ -29,6 +29,11 @@
             <li class="__detail"><slot name="githubUrl">-</slot></li>
             <li class="__detail"><slot name="cloneUrl">-</slot></li>
             <li class="__detail"><slot name="createdAt">-</slot></li>
+            <li class="__detail"><slot name="fork">-</slot></li>
+            <li class="__detail"><slot name="has_issues">-</slot></li>
+            <li class="__detail"><slot name="has_pages">-</slot></li>
+            <li class="__detail"><slot name="has_wiki">-</slot></li>
+            <li class="__detail"><slot name="has_downloads">-</slot></li>
          </ul>
          <p v-if="showNotify" class="notify">{{ notify }}</p>
       </div>
@@ -50,6 +55,7 @@
          v-if="openCommitsModal && commits.length > 0"
          @close="openCommitsModal = false"
       >
+
          <template #header>Commits for: {{ repoName }}</template>
 
          <template #body>
@@ -68,6 +74,22 @@
                   </div>
                </li>
             </ul>
+
+             <!-- Pager -->
+            <div class="pager">
+               <p class="__details">
+                  Commits Page:
+                  <span class="bold"
+                     >{{ currCommitsPage }}</span
+                  >
+               </p>
+               <div class="__page-form">
+                  <div>
+                     <button :disabled="!(currCommitsPage >= 2)" @click="getCommits('prev')">Prev. Page</button>
+                     <button :disabled="commits.length < commitsPerPage" @click="getCommits('next')">Next Page</button>
+                  </div>
+               </div>
+            </div>
          </template>
 
          <template #footer>
@@ -97,9 +119,26 @@
                   <UserCard
                      :userLogin="item.login"
                      :userAvatarUrl="item.avatar_url"
+                     :contributions="item.contributions"
                   />
                </li>
             </ul>
+
+             <!-- Pager -->
+            <div class="pager">
+               <p class="__details">
+                  Commits Page:
+                  <span class="bold"
+                     >{{ currContributorsPage }}</span
+                  >
+               </p>
+               <div class="__page-form">
+                  <div>
+                     <button :disabled="!(currContributorsPage >= 2)" @click="getContributors('prev')">Prev. Page</button>
+                     <button :disabled="contributors.length < contributorsPerPage" @click="getContributors('next')">Next Page</button>
+                  </div>
+               </div>
+            </div>
          </template>
 
          <template #footer>
@@ -150,14 +189,30 @@ export default class TheRepo extends Vue {
    commits:string[] = [];
    contributors:[] = [];
    notify!:string;
+   commitsPerPage = 20;
+   currCommitsPage = 1;
+   contributorsPerPage = 5;
+   currContributorsPage = 1;
 
+   
    @Watch("openCommitsModal")
-   async getCommits():Promise<void> {
+   async getCommits(mode:string):Promise<void> {
+      
+      if (mode === 'next' && mode != null) {
+             this.currCommitsPage++;
+         } else if (mode === 'prev'){
+            this.currCommitsPage >= 2 ? this.currCommitsPage-- : this.currCommitsPage = 1;
+         } else {
+            //Do nothing
+         }
+
       try {
          this.commits = await RepositoryService.getCommits(
             this.userLogin,
             this.repoName,
-            this.openCommitsModal
+            this.openCommitsModal,
+            this.currCommitsPage,
+            this.commitsPerPage
          );
       } catch (err) {
          console.warn(err.message);
@@ -171,7 +226,12 @@ export default class TheRepo extends Vue {
          if (this.commits && this.commits.length === 0) {
             this.openCommitsModal = false;
             this.showNotify = true;
-            this.notify = "This repository has no commits to show.";
+            if (mode === 'next' ) {
+            this.notify = "No more commits to show.";
+            } else {
+               this.notify = "This repository has no commits to show.";
+            }
+         this.currCommitsPage = 1;
             setTimeout(() => {
                this.showNotify = false;
                this.notify = "";
@@ -181,12 +241,22 @@ export default class TheRepo extends Vue {
    }
 
    @Watch("openContributorsModal")
-   async getContributors():Promise<any> {
+   async getContributors(mode:string):Promise<any> {
+       
+      if (mode === 'next' && mode != null) {
+             this.currContributorsPage++;
+         } else if (mode === 'prev'){
+            this.currContributorsPage >= 2 ? this.currContributorsPage-- : this.currContributorsPage = 1;
+         } else {
+            //Do nothing
+         }
       try {
          this.contributors = await RepositoryService.getContributors(
             this.userLogin,
             this.repoName,
-            this.openContributorsModal
+            this.openContributorsModal,
+            this.currContributorsPage,
+            this.contributorsPerPage
          );
       } catch (err) {
          console.warn(err.message);
@@ -200,7 +270,11 @@ export default class TheRepo extends Vue {
          if (this.contributors && this.contributors.length === 0) {
             this.openContributorsModal = false;
             this.showNotify = true;
-            this.notify = "This repository has no contributors to show.";
+            if (mode === 'next' ) {
+               this.notify = "No more contributors to show.";
+            } else {
+                this.notify = "This repository has no contributors to show.";
+            }
             setTimeout(() => {
                this.showNotify = false;
                this.notify = "";
@@ -231,6 +305,15 @@ export default class TheRepo extends Vue {
       border-left: 3px solid $third-app-color-dark;
       margin: 5px 0;
       padding-left: 10px;
+      .icon {
+         margin-left: 10px;
+         &--true path{
+            fill: #73ff73;
+         }
+          &--false path{
+            fill: #ff8181;
+         }
+   }
    }
 
    .notify {
@@ -307,4 +390,6 @@ export default class TheRepo extends Vue {
       overflow-wrap: break-word;
    }
 }
+
+
 </style>

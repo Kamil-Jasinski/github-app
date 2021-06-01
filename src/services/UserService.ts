@@ -30,6 +30,24 @@ export default new (class UserService {
       return reposPerPage.data;
     
   }
+
+  async getFollowers(userLogin:string, openFollowersModal:boolean, page:number ,perPage:number) {
+    if (openFollowersModal) {
+      const followers = await Vue.axios.get(
+        `https://api.github.com/users/${userLogin}/followers?page=${page}&per_page=${perPage}`
+      );
+      return followers.data;
+    }
+  }
+
+  async getFollowedUsers(userLogin:string, openFollowersModal:boolean, page:number ,perPage:number) {
+    if (openFollowersModal) {
+      const followedUsers = await Vue.axios.get(
+        `https://api.github.com/users/${userLogin}/following?page=${page}&per_page=${perPage}`
+      );
+      return followedUsers.data;
+    }
+  }
 })();
 
 export interface reposPerPage {
